@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: mindmate-backend
+    runtime: python
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && python jaseci_server.py
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: true
+      - key: PORT
+        value: 5000
+      - key: LLM_PROVIDER
+        value: openai
+      - key: JASECI_HOST
+        value: 0.0.0.0
+
+  - type: web
+    name: mindmate-frontend
+    runtime: node
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm install -g serve && serve -s build -l 3000
+    envVars:
+      - key: REACT_APP_JASECI_API_URL
+        value: https://mindmate-backend.onrender.com
+      - key: NODE_ENV
+        value: production
