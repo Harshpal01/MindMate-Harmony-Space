@@ -1,0 +1,216 @@
+/* DailySummary Component Styles */
+
+.daily-summary {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.daily-summary.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #10b981;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.daily-summary h2 {
+  color: #059669;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Current Mood Card */
+.current-mood-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+  border-left: 4px solid #10b981;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.current-mood-card h3 {
+  color: #10b981;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.mood-display {
+  text-align: center;
+}
+
+.mood-name {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+  text-transform: capitalize;
+}
+
+.intensity-bar {
+  width: 100%;
+  height: 12px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.intensity-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  transition: width 0.5s ease;
+}
+
+.intensity-text {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #666;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+  color: #10b981;
+}
+
+.tab-btn.active {
+  color: #10b981;
+  border-bottom-color: #10b981;
+}
+
+/* Tab Content */
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.summary-tab,
+.recommendations-tab,
+.breathing-tab {
+  padding: 1rem;
+}
+
+.summary-tab h4,
+.recommendations-tab h4,
+.breathing-tab h4 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.summary-tab ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.summary-tab li {
+  padding: 0.5rem 0;
+  color: #666;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summary-tab li:before {
+  content: '→';
+  color: #10b981;
+  font-weight: bold;
+}
+
+/* Recommendations */
+.recommendation-item {
+  background: rgba(16, 185, 129, 0.05);
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  border-left: 3px solid #10b981;
+}
+
+.recommendation-item h5 {
+  color: #333;
+  margin-bottom: 0.3rem;
+  text-transform: capitalize;
+}
+
+.recommendation-item p {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Breathing Exercise */
+.exercise-content {
+  background: rgba(16, 185, 129, 0.05);
+  border-left: 3px solid #10b981;
+  padding: 1.5rem;
+  border-radius: 6px;
+  line-height: 1.8;
+  color: #555;
+}
+
+/* Timestamp */
+.timestamp {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .daily-summary {
+    padding: 1.5rem;
+  }
+
+  .tabs {
+    gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-btn {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.85rem;
+  }
+}

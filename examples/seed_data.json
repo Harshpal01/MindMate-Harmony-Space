@@ -1,0 +1,178 @@
+{
+  "emotions": [
+    {"name": "happy", "emoji": "😊", "description": "Feeling joyful and content"},
+    {"name": "sad", "emoji": "😢", "description": "Feeling down or melancholic"},
+    {"name": "anxious", "emoji": "😰", "description": "Feeling worried or nervous"},
+    {"name": "calm", "emoji": "😌", "description": "Feeling peaceful and relaxed"},
+    {"name": "stressed", "emoji": "😫", "description": "Feeling overwhelmed by pressure"},
+    {"name": "content", "emoji": "😊", "description": "Feeling satisfied and good"},
+    {"name": "overwhelmed", "emoji": "😵", "description": "Feeling unable to cope"},
+    {"name": "peaceful", "emoji": "🧘", "description": "Feeling serene and grounded"},
+    {"name": "excited", "emoji": "🤩", "description": "Feeling enthusiastic and energized"},
+    {"name": "lonely", "emoji": "😔", "description": "Feeling isolated or disconnected"}
+  ],
+  "triggers": [
+    {
+      "name": "work_stress",
+      "category": "work",
+      "description": "Pressure and deadlines at work"
+    },
+    {
+      "name": "social_conflict",
+      "category": "social",
+      "description": "Arguments or disagreements with others"
+    },
+    {
+      "name": "health_concerns",
+      "category": "health",
+      "description": "Physical or mental health worries"
+    },
+    {
+      "name": "financial_pressure",
+      "category": "finance",
+      "description": "Money-related stress"
+    },
+    {
+      "name": "personal_loss",
+      "category": "personal",
+      "description": "Loss or grief"
+    },
+    {
+      "name": "sleep_deprivation",
+      "category": "health",
+      "description": "Lack of quality sleep"
+    },
+    {
+      "name": "poor_nutrition",
+      "category": "health",
+      "description": "Unhealthy eating habits"
+    },
+    {
+      "name": "social_isolation",
+      "category": "social",
+      "description": "Feeling disconnected from others"
+    },
+    {
+      "name": "overwhelming_schedule",
+      "category": "work",
+      "description": "Too many commitments"
+    },
+    {
+      "name": "perfectionism",
+      "category": "personal",
+      "description": "High expectations of oneself"
+    }
+  ],
+  "activities": [
+    {
+      "name": "exercise",
+      "type": "exercise",
+      "duration_minutes": 30,
+      "description": "Physical activity like walking, running, or gym"
+    },
+    {
+      "name": "journaling",
+      "type": "creative",
+      "duration_minutes": 15,
+      "description": "Writing about thoughts and feelings"
+    },
+    {
+      "name": "meditation",
+      "type": "mindful",
+      "duration_minutes": 10,
+      "description": "Guided or silent meditation practice"
+    },
+    {
+      "name": "deep_breathing",
+      "type": "mindful",
+      "duration_minutes": 5,
+      "description": "Focused breathing exercises"
+    },
+    {
+      "name": "social_connection",
+      "type": "social",
+      "duration_minutes": 30,
+      "description": "Call or meet with a friend"
+    },
+    {
+      "name": "nature_walk",
+      "type": "exercise",
+      "duration_minutes": 30,
+      "description": "Walking in nature or park"
+    },
+    {
+      "name": "reading",
+      "type": "creative",
+      "duration_minutes": 30,
+      "description": "Read a book or inspiring content"
+    },
+    {
+      "name": "creative_hobby",
+      "type": "creative",
+      "duration_minutes": 45,
+      "description": "Art, music, crafting, or other creative pursuits"
+    },
+    {
+      "name": "rest_and_sleep",
+      "type": "rest",
+      "duration_minutes": 60,
+      "description": "Nap or early bedtime"
+    },
+    {
+      "name": "warm_shower",
+      "type": "rest",
+      "duration_minutes": 15,
+      "description": "Relaxing warm shower or bath"
+    }
+  ],
+  "suggestions": [
+    {
+      "title": "4-7-8 Breathing Exercise",
+      "type": "breathing_exercise",
+      "content": "Inhale for 4 counts, hold for 7, exhale for 8. Repeat 4 times. This technique is proven to reduce anxiety.",
+      "duration_seconds": 120
+    },
+    {
+      "title": "5 Senses Grounding",
+      "type": "coping_tip",
+      "content": "Name 5 things you see, 4 you touch, 3 you hear, 2 you smell, 1 you taste. This anchors you to the present moment.",
+      "duration_seconds": 300
+    },
+    {
+      "title": "You Are Strong",
+      "type": "affirmation",
+      "content": "I am capable of handling whatever comes my way. I have overcome challenges before and I can do it again.",
+      "duration_seconds": 0
+    },
+    {
+      "title": "Box Breathing",
+      "type": "breathing_exercise",
+      "content": "Inhale for 4, hold for 4, exhale for 4, hold for 4. Repeat for 2 minutes. Great for calming panic.",
+      "duration_seconds": 120
+    },
+    {
+      "title": "Progressive Muscle Relaxation",
+      "type": "coping_tip",
+      "content": "Tense and release each muscle group from toes to head. Helps release physical tension from stress.",
+      "duration_seconds": 600
+    },
+    {
+      "title": "I Am Resilient",
+      "type": "affirmation",
+      "content": "This feeling is temporary. I am strong and I will get through this. I have resources and strength within me.",
+      "duration_seconds": 0
+    },
+    {
+      "title": "Body Scan Meditation",
+      "type": "coping_tip",
+      "content": "Starting at your head, mentally scan down your body, noticing and relaxing tension. Brings awareness to stress patterns.",
+      "duration_seconds": 900
+    },
+    {
+      "title": "Loving-Kindness Meditation",
+      "type": "coping_tip",
+      "content": "Send compassion to yourself and others through gentle meditation. Builds emotional resilience and connection.",
+      "duration_seconds": 600
+    }
+  ]
+}

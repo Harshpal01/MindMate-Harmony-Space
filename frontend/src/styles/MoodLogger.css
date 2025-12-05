@@ -1,0 +1,385 @@
+/* MoodLogger Component Styles */
+
+.mood-logger-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.mood-logger-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.mood-logger-card h2 {
+  color: #059669;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.section-label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/* Mood Grid */
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.mood-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.mood-btn:hover {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.05);
+  transform: translateY(-2px);
+}
+
+.mood-btn.selected {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.mood-emoji {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.mood-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Intensity Section */
+.intensity-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.intensity-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #ff6b6b, #ffd93d, #6bcf7f);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 1rem 0;
+}
+
+.intensity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+.intensity-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+.intensity-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+/* Journal Section */
+.journal-section {
+  margin-bottom: 1.5rem;
+}
+
+.journal-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.journal-textarea:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Submitted State - Full Support Message */
+.mood-logger-container.submitted-state {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.success-message-full {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.support-header {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+}
+
+.support-header h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.8rem;
+}
+
+.support-header p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.95;
+}
+
+/* Mood Display */
+.support-main-message {
+  padding: 2rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.mood-display {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.mood-emoji-large {
+  font-size: 3.5rem;
+  min-width: 80px;
+  text-align: center;
+}
+
+.mood-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: #10b981;
+  font-size: 1.3rem;
+}
+
+.mood-info p {
+  margin: 0;
+  color: #999;
+  font-size: 0.95rem;
+}
+
+.support-text {
+  margin: 1rem 0;
+}
+
+.main-message {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #333;
+  margin: 0;
+  padding: 1.5rem;
+  background: rgba(16, 185, 129, 0.05);
+  border-left: 4px solid #10b981;
+  border-radius: 4px;
+  font-style: italic;
+}
+
+/* Suggestions Section */
+.suggestions-section {
+  padding: 2rem;
+  background: rgba(240, 253, 244, 0.8);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.suggestions-section h4 {
+  margin: 0 0 1rem 0;
+  color: #10b981;
+  font-size: 1.1rem;
+}
+
+.suggestions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.suggestions-list li {
+  padding: 0.75rem 0;
+  color: #555;
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.suggestions-list li:last-child {
+  border-bottom: none;
+}
+
+/* Resources Section */
+.resources-section {
+  padding: 2rem;
+  background: rgba(16, 185, 129, 0.05);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.resources-section h4 {
+  margin: 0 0 1rem 0;
+  color: #10b981;
+  font-size: 1.1rem;
+}
+
+.resources-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.resource-item {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #10b981;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.resource-item strong {
+  display: block;
+  color: #10b981;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.resource-item p {
+  margin: 0.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.resource-item a {
+  color: #10b981;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 0.75rem;
+  transition: color 0.3s ease;
+}
+
+.resource-item a:hover {
+  color: #059669;
+}
+
+/* Support Footer */
+.support-footer {
+  padding: 2rem;
+  text-align: center;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.encouragement {
+  font-size: 1rem;
+  color: #555;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.log-another-btn {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.log-another-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Loading State */
+.mood-logger-container.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: white;
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .mood-logger-card {
+    padding: 1.5rem;
+  }
+
+  .mood-grid {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .mood-emoji {
+    font-size: 1.5rem;
+  }
+}
