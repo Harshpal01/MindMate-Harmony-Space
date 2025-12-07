@@ -22,17 +22,8 @@ except ImportError:
 import datetime
 
 app = Flask(__name__)
-# Allow calls from Render frontend and local dev frontends
-CORS(
-    app,
-    resources={r"/*": {
-        "origins": [
-            "https://mindmate-frontend-5tx7.onrender.com",
-            "http://localhost:3000",
-            "http://localhost:5173",
-        ]
-    }}
-)
+# For this demo, allow any origin so both Render frontend and local dev can call the API
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Initialize Jaseci if available
 jac_engine = None
