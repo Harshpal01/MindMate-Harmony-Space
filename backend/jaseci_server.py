@@ -410,13 +410,18 @@ def get_graph():
 
 
 if __name__ == '__main__':
+    # Determine host/port for local dev vs. Render/other hosts
+    port = int(os.environ.get('PORT', 5000))
+    host = os.environ.get('HOST', '0.0.0.0')
+
     print("\n" + "="*60)
     print("🚀 MindMate Harmony Space - Jaseci Backend Server")
     print("="*60)
-    print(f"📍 Server: http://localhost:5000")
+    print(f"📍 Server binding: http://{host}:{port}")
     print(f"✅ Jaseci Engine: {'Enabled' if JASECI_AVAILABLE else 'Mock Mode (Development)'}")
     print("📝 Jac Program: mindmate.jac")
-    print("🔗 Frontend: http://localhost:3000")
+    print("🔗 Frontend (local dev): http://localhost:3000")
     print("="*60 + "\n")
-    
-    app.run(host='localhost', port=5000, debug=False, use_reloader=False)
+
+    # On Render and similar platforms, PORT is provided and host must be 0.0.0.0
+    app.run(host=host, port=port, debug=False, use_reloader=False)
