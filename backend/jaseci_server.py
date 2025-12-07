@@ -27,9 +27,6 @@ app = Flask(__name__)
 # For this demo, allow any origin so both Render frontend and local dev can call the API
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Initialize SQLite mood history
-init_db()
-
 # Initialize Jaseci if available
 jac_engine = None
 if JASECI_AVAILABLE:
@@ -651,6 +648,9 @@ def get_graph():
 
 
 if __name__ == '__main__':
+    # Ensure SQLite mood history table exists before serving
+    init_db()
+
     # Determine host/port for local dev vs. Render/other hosts
     port = int(os.environ.get('PORT', 5000))
     host = os.environ.get('HOST', '0.0.0.0')
