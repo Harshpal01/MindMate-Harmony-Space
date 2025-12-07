@@ -53,9 +53,18 @@ export default function MoodLogger({ userId, onMoodLogged }) {
           '🎵 Listen to music that matches or shifts your mood'
         ],
         resources: [
-          { title: 'Mental Health Hotline', phone: '1-800-273-8255' },
-          { title: 'Crisis Text Line', text: 'Text HOME to 741741' },
-          { title: 'International Association for Suicide Prevention', url: 'https://www.iasp.info/resources/Crisis_Centres/' }
+          {
+            title: 'Niskize Crisis & Suicide Prevention Helpline (Kenya)',
+            phone: '0900 620 800',
+          },
+          {
+            title: 'Niskize Mobile Line (Kenya)',
+            phone: '+254 718 227 440',
+          },
+          {
+            title: 'International Association for Suicide Prevention',
+            url: 'https://www.iasp.info/resources/Crisis_Centres/',
+          },
         ]
       });
 
