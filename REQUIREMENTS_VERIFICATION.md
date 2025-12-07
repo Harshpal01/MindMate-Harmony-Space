@@ -2,7 +2,7 @@
 
 ## MindMate Harmony Space - Complete Compliance Review
 
-**Date:** December 5, 2025  
+**Date:** December 8, 2025  
 **Project:** MindMate Harmony Space - AI Mental-Wellbeing Companion  
 **Status:** ✅ **ALL REQUIREMENTS MET**
 
@@ -279,6 +279,13 @@ Supported LLM Providers (3):
 3. **Anthropic**
    - Models: Claude 3 Sonnet, Claude 3 Opus
    - Config: ANTHROPIC_API_KEY, ANTHROPIC_MODEL
+
+4. **Google Gemini** *(backend mock → real LLM integration)*
+
+   - Model: gemini-1.5-flash (via Generative Language API)
+   - Endpoint: https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent
+   - Config: GOOGLE_API_KEY (read from environment on backend)
+   - Usage: `generate_support_message` now calls Gemini when GOOGLE_API_KEY is present, with safe fallback to rule-based messages.
 
 #### **Prompt Engineering**
 
@@ -606,7 +613,7 @@ All walker calls implemented via REST API:
 | **Preloaded Triggers**     | 10                                                  |
 | **Preloaded Activities**   | 10                                                  |
 | **Preloaded Suggestions**  | 8                                                   |
-| **LLM Providers**          | 3 (OpenAI, Ollama, Anthropic)                       |
+| **LLM Providers**          | 4 (OpenAI, Ollama, Anthropic, Gemini)               |
 | **API Endpoints**          | 12+ walker calls                                    |
 | **Responsive Breakpoints** | 2 (desktop, mobile)                                 |
 
