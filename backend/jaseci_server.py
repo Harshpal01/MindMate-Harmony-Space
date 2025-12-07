@@ -9,6 +9,7 @@ import json
 import os
 import sys
 from pathlib import Path
+import sqlite3
 import requests
 
 # Try to import Jaseci components
@@ -26,6 +27,9 @@ app = Flask(__name__)
 # For this demo, allow any origin so both Render frontend and local dev can call the API
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+# Initialize SQLite mood history
+init_db()
+
 # Initialize Jaseci if available
 jac_engine = None
 if JASECI_AVAILABLE:
@@ -38,6 +42,143 @@ if JASECI_AVAILABLE:
 # Simulated data storage (for mock mode and persistence)
 MOOD_LOG = []
 GRAPH_DATA = {}
+
+# ---------------------------------------------------------------------------
+# Lightweight SQLite persistence for mood history
+# ---------------------------------------------------------------------------
+
+BASE_DIR = Path(__file__).resolve().parent
+DB_FILE = os.environ.get("MOOD_DB_FILE", "mindmate.db")
+DB_PATH = BASE_DIR / DB_FILE
+
+
+def get_db_connection():
+    """Get a SQLite connection to the mood history database."""
+    return sqlite3.connect(DB_PATH)
+
+
+def init_db():
+    """Initialize the SQLite database with a simple mood_entries table."""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS mood_entries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id TEXT,
+                timestamp TEXT,
+                mood TEXT,
+                intensity INTEGER,
+                journal TEXT
+            )
+            """
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"⚠️ Failed to initialize SQLite mood history DB: {e}")
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
+def save_mood_entry(mood_entry: dict):
+    """Persist a single mood entry to SQLite. Best-effort, non-fatal on error."""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO mood_entries (user_id, timestamp, mood, intensity, journal)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                mood_entry.get("user_id", "user1"),
+                mood_entry.get("timestamp"),
+                mood_entry.get("mood"),
+                int(mood_entry.get("intensity", 5)),
+                mood_entry.get("journal", ""),
+            ),
+        )
+        conn.commit()
+    except Exception as e:
+        print(f"⚠️ Failed to save mood entry to DB: {e}")
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
+def get_today_entries_from_db(user_id: str | None = None):
+    """Return all mood entries for today from SQLite (optionally filtered by user)."""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        today = datetime.date.today().isoformat()
+        if user_id:
+            cur.execute(
+                """
+                SELECT timestamp, mood, intensity, journal, user_id
+                FROM mood_entries
+                WHERE date(timestamp) = date(?) AND user_id = ?
+                ORDER BY timestamp
+                """,
+                (today, user_id),
+            )
+        else:
+            cur.execute(
+                """
+                SELECT timestamp, mood, intensity, journal, user_id
+                FROM mood_entries
+                WHERE date(timestamp) = date(?)
+                ORDER BY timestamp
+                """,
+                (today,),
+            )
+        rows = cur.fetchall()
+        conn.close()
+        return rows
+    except Exception as e:
+        print(f"⚠️ Failed to load today's entries from DB: {e}")
+        return []
+
+
+def get_recent_entries_from_db(days: int = 7, user_id: str | None = None):
+    """Return mood entries from the last `days` days from SQLite."""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        today = datetime.date.today()
+        start_date = (today - datetime.timedelta(days=days)).isoformat()
+        if user_id:
+            cur.execute(
+                """
+                SELECT timestamp, mood, intensity, journal, user_id
+                FROM mood_entries
+                WHERE date(timestamp) >= date(?) AND user_id = ?
+                ORDER BY timestamp
+                """,
+                (start_date, user_id),
+            )
+        else:
+            cur.execute(
+                """
+                SELECT timestamp, mood, intensity, journal, user_id
+                FROM mood_entries
+                WHERE date(timestamp) >= date(?)
+                ORDER BY timestamp
+                """,
+                (start_date,),
+            )
+        rows = cur.fetchall()
+        conn.close()
+        return rows
+    except Exception as e:
+        print(f"⚠️ Failed to load recent entries from DB: {e}")
+        return []
 
 # Sample data
 EMOTIONS = {
@@ -149,6 +290,8 @@ def handle_log_mood(ctx):
         "user_id": ctx.get('user_id', 'user1'),
     }
     MOOD_LOG.append(mood_entry)
+    # Best-effort persistence to SQLite for history/trends
+    save_mood_entry(mood_entry)
     
     return {
         "status": "success",
@@ -340,19 +483,28 @@ def handle_generate_support_message(ctx):
 
 def handle_get_daily_summary(ctx):
     """Jac Walker: get_daily_summary - Graph traversal for daily insights"""
-    today = datetime.date.today()
-    today_entries = [e for e in MOOD_LOG if e["timestamp"].startswith(today.isoformat())]
-    
-    current_mood = "calm"
-    if today_entries:
-        current_mood = today_entries[-1]["mood"]
-    
+    user_id = ctx.get('user_id', None)
+
+    # Prefer DB entries; fall back to in-memory if needed
+    today_rows = get_today_entries_from_db(user_id=user_id)
+    if today_rows:
+        # rows: (timestamp, mood, intensity, journal, user_id)
+        last = today_rows[-1]
+        current_mood = last[1] or "calm"
+        entries_count = len(today_rows)
+    else:
+        today = datetime.date.today()
+        today_entries = [e for e in MOOD_LOG if e["timestamp"].startswith(today.isoformat())]
+        current_mood = today_entries[-1]["mood"] if today_entries else "calm"
+        entries_count = len(today_entries)
+
     return {
         "status": "success",
         "walker": "get_daily_summary",
         "current_mood": current_mood,
+        # For now, keep a simple fixed intensity; could be averaged from DB later
         "intensity": 5,
-        "entries_count": len(today_entries),
+        "entries_count": entries_count,
         "recommendations": [
             {"activity": "meditation", "duration": 10, "reason": "To find inner peace"},
             {"activity": "walk", "duration": 20, "reason": "Fresh air helps clear your mind"},
@@ -368,11 +520,19 @@ def handle_get_daily_summary(ctx):
 
 def handle_get_weekly_summary(ctx):
     """Jac Walker: get_weekly_summary - Graph analysis for weekly patterns"""
-    moods = [e["mood"] for e in MOOD_LOG[-7:]]
+    user_id = ctx.get('user_id', None)
+
+    # Prefer DB entries from the last 7 days for trend analysis
+    rows = get_recent_entries_from_db(days=7, user_id=user_id)
+    if rows:
+        moods = [r[1] for r in rows]  # mood column
+    else:
+        moods = [e["mood"] for e in MOOD_LOG[-7:]]
+
     mood_counts = {}
     for mood in moods:
         mood_counts[mood] = mood_counts.get(mood, 0) + 1
-    
+
     return {
         "status": "success",
         "walker": "get_weekly_summary",
@@ -431,11 +591,17 @@ def handle_generate_breathing_exercise(ctx):
 
 def handle_find_common_emotions(ctx):
     """Jac Walker: find_common_emotions - Identify repeating patterns in graph"""
-    moods = [e["mood"] for e in MOOD_LOG]
+    user_id = ctx.get('user_id', None)
+    rows = get_recent_entries_from_db(days=30, user_id=user_id)
+    if rows:
+        moods = [r[1] for r in rows]
+    else:
+        moods = [e["mood"] for e in MOOD_LOG]
+
     mood_counts = {}
     for mood in moods:
         mood_counts[mood] = mood_counts.get(mood, 0) + 1
-    
+
     return {
         "status": "success",
         "walker": "find_common_emotions",
@@ -445,8 +611,13 @@ def handle_find_common_emotions(ctx):
 
 def handle_calculate_trends(ctx):
     """Jac Walker: calculateEmotionalTrends - Analyze emotional trends over time"""
-    moods = [e["mood"] for e in MOOD_LOG[-7:]]
-    
+    user_id = ctx.get('user_id', None)
+    rows = get_recent_entries_from_db(days=7, user_id=user_id)
+    if rows:
+        moods = [r[1] for r in rows]
+    else:
+        moods = [e["mood"] for e in MOOD_LOG[-7:]]
+
     return {
         "status": "success",
         "walker": "calculateEmotionalTrends",
