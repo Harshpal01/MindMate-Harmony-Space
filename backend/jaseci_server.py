@@ -248,6 +248,41 @@ def execute_mock_walker(walker_name, ctx):
         return {"error": f"Unknown walker: {walker_name}"}
 
 
+# ---------------------------------------------------------------------------
+# Simple trigger detection helpers for daily summary
+# ---------------------------------------------------------------------------
+
+TRIGGER_KEYWORDS = {
+    "work stress": ["work", "job", "office", "deadline", "boss", "coworker"],
+    "social conflict": ["argument", "fight", "conflict", "friend", "family", "relationship"],
+    "health concerns": ["sick", "ill", "hospital", "doctor", "health", "pain"],
+    "financial pressure": ["money", "bills", "rent", "debt", "salary", "broke"],
+    "overwhelming schedule": ["busy", "overwhelmed", "too much", "no time", "exhausted"],
+}
+
+
+def detect_triggers_from_journals(journals):
+    """Very simple keyword-based trigger detection from a list of journal texts."""
+    text = " ".join(journals or [])
+    if not text.strip():
+        return []
+
+    text_lower = text.lower()
+    detected = []
+    for label, keywords in TRIGGER_KEYWORDS.items():
+        if any(kw in text_lower for kw in keywords):
+            detected.append(label)
+
+    # Deduplicate while preserving order
+    seen = set()
+    unique = []
+    for t in detected:
+        if t not in seen:
+            seen.add(t)
+            unique.append(t)
+    return unique
+
+
 @app.route('/api/walker', methods=['POST'])
 def walker_endpoint():
     """
@@ -489,11 +524,17 @@ def handle_get_daily_summary(ctx):
         last = today_rows[-1]
         current_mood = last[1] or "calm"
         entries_count = len(today_rows)
+        journals = [row[3] or "" for row in today_rows]
+        triggers = detect_triggers_from_journals(journals)
+        timestamp = last[0]
     else:
         today = datetime.date.today()
         today_entries = [e for e in MOOD_LOG if e["timestamp"].startswith(today.isoformat())]
         current_mood = today_entries[-1]["mood"] if today_entries else "calm"
         entries_count = len(today_entries)
+        journals = [e.get("journal", "") for e in today_entries]
+        triggers = detect_triggers_from_journals(journals)
+        timestamp = today_entries[-1]["timestamp"] if today_entries else datetime.datetime.now().isoformat()
 
     return {
         "status": "success",
@@ -502,6 +543,8 @@ def handle_get_daily_summary(ctx):
         # For now, keep a simple fixed intensity; could be averaged from DB later
         "intensity": 5,
         "entries_count": entries_count,
+        "triggers": triggers,
+        "timestamp": timestamp,
         "recommendations": [
             {"activity": "meditation", "duration": 10, "reason": "To find inner peace"},
             {"activity": "walk", "duration": 20, "reason": "Fresh air helps clear your mind"},
