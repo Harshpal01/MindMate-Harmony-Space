@@ -9,6 +9,7 @@ import json
 import os
 import sys
 from pathlib import Path
+import requests
 
 # Try to import Jaseci components
 try:
@@ -189,15 +190,83 @@ def handle_emotion_from_text(ctx):
     }
 
 
+def call_gemini_support_message(api_key: str, mood: str, journal: str, intensity: int) -> str:
+    """Call Google Gemini to generate a supportive message.
+
+    Uses the public Generative Language REST API with gemini-1.5-flash.
+    """
+    try:
+        endpoint = (
+            "https://generativelanguage.googleapis.com/v1beta/"
+            "models/gemini-1.5-flash:generateContent"
+        )
+
+        prompt = (
+            "You are an empathetic mental health companion named MindMate. "
+            "Given the user's current emotion, intensity, and a short journal entry, "
+            "write a concise, supportive message (2-4 sentences). "
+            "Be warm, non-clinical, and avoid giving medical advice.\n\n"
+            f"Current emotion: {mood or 'unknown'}\n"
+            f"Intensity (1-10): {intensity}\n"
+            f"Journal entry: {journal or 'N/A'}\n\n"
+            "Support message:"
+        )
+
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": prompt}
+                    ]
+                }
+            ]
+        }
+
+        params = {"key": api_key}
+        headers = {"Content-Type": "application/json"}
+
+        resp = requests.post(endpoint, params=params, headers=headers, json=payload, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+
+        # Extract the first candidate text if present
+        candidates = data.get("candidates") or []
+        if candidates:
+            parts = candidates[0].get("content", {}).get("parts") or []
+            texts = [p.get("text", "") for p in parts if isinstance(p, dict)]
+            joined = "\n".join(t for t in texts if t)
+            if joined.strip():
+                return joined.strip()
+
+    except Exception as e:
+        print(f"⚠️ Gemini support call failed: {e}")
+
+    # If anything goes wrong, return empty string so caller can fall back
+    return ""
+
+
 def handle_generate_support_message(ctx):
     """Jac Walker: generate_support_message - Generative LLM creates supportive response"""
-    # Frontend sends emotion_name/intensity_score/user_context; 
+    # Frontend sends emotion_name/intensity_score/user_context;
     # fall back to older keys for compatibility.
     mood = ctx.get('emotion_name') or ctx.get('mood', 'unknown')
     journal = ctx.get('journal_text') or ctx.get('user_context', '')
     intensity = ctx.get('intensity_score') if 'intensity_score' in ctx else ctx.get('intensity', 5)
-    
-    # Comprehensive, empathetic messages based on mood and intensity
+
+    # Try Gemini first if GOOGLE_API_KEY is available
+    gemini_key = os.environ.get("GOOGLE_API_KEY")
+    if gemini_key:
+        gemini_msg = call_gemini_support_message(gemini_key, mood, journal, intensity)
+        if gemini_msg:
+            return {
+                "status": "success",
+                "walker": "generate_support_message",
+                "message": gemini_msg,
+                "type": "support",
+                "provider": "gemini"
+            }
+
+    # Fallback: Comprehensive, empathetic messages based on mood and intensity
     messages = {
         "happy": {
             "low": "That's wonderful! These positive moments are precious. Enjoy this feeling and let it energize you.",
