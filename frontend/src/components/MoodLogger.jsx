@@ -127,7 +127,14 @@ export default function MoodLogger({ userId, onMoodLogged }) {
               {supportData.resources.map((resource, idx) => (
                 <div key={idx} className="resource-item">
                   <strong>{resource.title}</strong>
-                  {resource.phone && <p>📞 {resource.phone}</p>}
+                  {resource.phone && (
+                    <p>
+                      📞{' '}
+                      <a href={`tel:${resource.phone}`}>
+                        {resource.phone}
+                      </a>
+                    </p>
+                  )}
                   {resource.text && <p>💬 {resource.text}</p>}
                   {resource.url && <a href={resource.url} target="_blank" rel="noopener noreferrer">Learn more →</a>}
                 </div>
