@@ -21,6 +21,6 @@ services:
     startCommand: cd frontend && npm install -g serve && serve -s build -l 3000
     envVars:
       - key: REACT_APP_JASECI_API_URL
-        value: https://mindmate-backend.onrender.com
+        value: https://mindmate-backend-9kok.onrender.com
       - key: NODE_ENV
         value: production
