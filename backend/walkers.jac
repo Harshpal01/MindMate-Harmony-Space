@@ -3,10 +3,10 @@ MindMate Harmony Space - Core Walkers
 All walker implementations for mood logging, analysis, and recommendations
 """
 
-import:py from py_modules {
-    datetime,
-    json,
-    random
+:py {
+import datetime
+import json
+import random
 }
 
 # ============================================================================

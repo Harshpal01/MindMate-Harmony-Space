@@ -3,10 +3,10 @@ MindMate Harmony Space - AI Agents
 Multi-agent system with byLLM integration for emotional analysis and support generation
 """
 
-import:py from py_modules {
-    requests,
-    json,
-    os,
+:py {
+import requests
+import json
+import os
 }
 
 # ============================================================================
