@@ -2,6 +2,27 @@
 
 ## MindMate Harmony Space - Get Up and Running in 5 Minutes
 
+---
+
+## WSL USERS - INITIAL SETUP (Run Once)
+
+If you're using WSL (Windows Subsystem for Linux), run this setup script first:
+
+```bash
+cd backend
+bash setup-wsl.sh
+```
+
+This will:
+
+1. Install required Python packages
+2. Create a virtual environment
+3. Install all Python dependencies
+
+Then proceed to any option below (the venv will be automatically activated).
+
+---
+
 ### Prerequisites Check
 
 ```bash
