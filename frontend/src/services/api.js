@@ -3,6 +3,8 @@ import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_JASECI_API_URL || 'http://localhost:8000';
 
 // API client for walker endpoints
+// Note: jac-client is installed and available for future Spawn() implementation
+// Currently using axios as fallback for stability
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -11,6 +13,7 @@ const apiClient = axios.create({
 });
 
 // Helper to call jac serve walker endpoints
+// This mimics Spawn() behavior by calling /walker/<name> endpoints
 const callWalker = async (walkerName, fields = {}) => {
   try {
     const response = await apiClient.post(`/walker/${walkerName}`, fields);
