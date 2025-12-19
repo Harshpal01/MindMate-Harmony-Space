@@ -138,31 +138,30 @@ MindMate-Harmony-Space/
 │   ├── mindmate.jac              # Main OSP graph & node definitions
 │   ├── walkers.jac               # Core Jac walkers (graph + analysis)
 │   ├── agents.jac                # AI agents (byLLM prompts and logic)
-│   ├── jaseci_server.py          # Flask server exposing Jac-like walkers over HTTP
+│   ├── app.jac                   # Application initialization
 │   ├── seed_data.py              # Initial emotions, triggers, activities, suggestions
 │   ├── config.py                 # Configuration (LLM providers, DB, server)
+│   ├── mind_functions.py         # Helper functions
 │   └── requirements.txt          # Python dependencies
 ├── frontend/
 │   ├── public/
-│   │   ├── index.html
-│   │   └── favicon.ico
+│   │   └── index.html
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── MoodLogger.jsx
-│   │   │   ├── JournalEntry.jsx
 │   │   │   ├── DailySummary.jsx
-│   │   │   ├── WeeklyTrends.jsx
-│   │   │   ├── RecommendationCard.jsx
-│   │   │   └── BreathingExercise.jsx
-│   │   ├── pages/
-│   │   │   ├── Home.jsx
-│   │   │   ├── Dashboard.jsx
-│   │   │   └── Analytics.jsx
+│   │   │   └── WeeklyTrends.jsx
+│   │   ├── pages/               # (Empty - future expansion)
 │   │   ├── services/
-│   │   │   └── api.js           # Jaseci Spawn() API calls
+│   │   │   └── api.js           # Walker API calls
+│   │   ├── styles/
+│   │   │   ├── DailySummary.css
+│   │   │   ├── MoodLogger.css
+│   │   │   └── WeeklyTrends.css
 │   │   ├── App.jsx
+│   │   ├── App.css
 │   │   ├── index.js
-│   │   └── App.css
+│   │   └── index.css
 │   ├── package.json
 │   └── .env.example
 ├── docs/
@@ -171,13 +170,13 @@ MindMate-Harmony-Space/
 │   ├── API_ENDPOINTS.md          # Walker API reference
 │   └── DEMO_GUIDE.md             # How to run the demo
 ├── examples/
-│   ├── sample_moods.json
-│   ├── sample_journals.json
-│   └── postman_collection.json
-├── .github/
-│   └── copilot-instructions.md
+│   └── seed_data.json            # Sample data for testing
+├── Procfile                      # Deployment configuration
+├── render.yaml                   # Render deployment settings
+├── RENDER_DEPLOYMENT.md          # Deployment guide
+├── QUICK_START.md                # Quick start guide
 ├── README.md
-├── LICENSE
+└── LICENSE
 └── .gitignore
 ```
 
