@@ -1,5 +1,6 @@
 jaseci>=0.5.0
 jaseci-serv>=0.5.0
+jaclang>=0.7.0
 python-dotenv>=0.19.0
 requests>=2.26.0
 flask>=2.0.0
