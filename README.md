@@ -114,7 +114,8 @@ Journal Entries
 ### Frontend
 
 - **React** - UI library
-- **Axios** - HTTP client for Spawn() API calls
+- **jac-client** - Official Jaseci client library for Spawn() walker calls
+- **Axios** - Fallback HTTP client for non-walker endpoints
 - **Recharts** - Emotional trend visualization
 - **Tailwind CSS** - Styling
 

@@ -1,7 +1,15 @@
+import { createClient } from 'jac-client';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_JASECI_API_URL || 'http://localhost:5000';
 
+// Initialize jac-client for Jaseci walker calls
+const jacClient = createClient({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+});
+
+// Fallback axios client for non-walker endpoints
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -15,16 +23,13 @@ const apiClient = axios.create({
 
 export const logMood = async (userId, moodName, intensity, journalText = '') => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'log_mood',
-      ctx: {
-        user_id: userId,
-        mood_name: moodName,
-        intensity: intensity,
-        journal_text: journalText,
-      },
+    const response = await jacClient.spawn('log_mood', {
+      user_id: userId,
+      mood_name: moodName,
+      intensity: intensity,
+      journal_text: journalText,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error logging mood:', error);
     throw error;
@@ -33,14 +38,11 @@ export const logMood = async (userId, moodName, intensity, journalText = '') => 
 
 export const analyzeJournal = async (userId, journalText) => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'emotion_from_text',
-      ctx: {
-        journal_text: journalText,
-        user_id: userId,
-      },
+    const response = await jacClient.spawn('emotion_from_text', {
+      journal_text: journalText,
+      user_id: userId,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error analyzing journal:', error);
     throw error;
@@ -53,13 +55,10 @@ export const analyzeJournal = async (userId, journalText) => {
 
 export const getDailySummary = async (userId) => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'get_daily_summary',
-      ctx: {
-        user_id: userId,
-      },
+    const response = await jacClient.spawn('get_daily_summary', {
+      user_id: userId,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error getting daily summary:', error);
     throw error;
@@ -68,13 +67,10 @@ export const getDailySummary = async (userId) => {
 
 export const getWeeklySummary = async (userId) => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'get_weekly_summary',
-      ctx: {
-        user_id: userId,
-      },
+    const response = await jacClient.spawn('get_weekly_summary', {
+      user_id: userId,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error getting weekly summary:', error);
     throw error;
@@ -83,14 +79,11 @@ export const getWeeklySummary = async (userId) => {
 
 export const getRecommendations = async (emotion, intensity) => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'recommend_activities',
-      ctx: {
-        emotion_name: emotion,
-        intensity: intensity,
-      },
+    const response = await jacClient.spawn('recommend_activities', {
+      emotion_name: emotion,
+      intensity: intensity,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error getting recommendations:', error);
     throw error;
@@ -103,16 +96,13 @@ export const getRecommendations = async (emotion, intensity) => {
 
 export const generateSupportMessage = async (emotion, intensity, triggers = [], context = '') => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'generate_support_message',
-      ctx: {
-        emotion_name: emotion,
-        intensity_score: intensity,
-        detected_triggers: triggers,
-        user_context: context,
-      },
+    const response = await jacClient.spawn('generate_support_message', {
+      emotion_name: emotion,
+      intensity_score: intensity,
+      detected_triggers: triggers,
+      user_context: context,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error generating support message:', error);
     throw error;
@@ -121,15 +111,12 @@ export const generateSupportMessage = async (emotion, intensity, triggers = [], 
 
 export const generateBreathingExercise = async (emotion, intensity, duration = 300) => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'generate_breathing_exercise',
-      ctx: {
-        emotion_name: emotion,
-        intensity_score: intensity,
-        duration_preference: duration,
-      },
+    const response = await jacClient.spawn('generate_breathing_exercise', {
+      emotion_name: emotion,
+      intensity_score: intensity,
+      duration_preference: duration,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error generating breathing exercise:', error);
     throw error;
@@ -138,16 +125,13 @@ export const generateBreathingExercise = async (emotion, intensity, duration = 3
 
 export const generateAffirmation = async (emotion, intensity, userName = 'Friend', triggers = []) => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'generate_affirmation',
-      ctx: {
-        emotion_name: emotion,
-        intensity_score: intensity,
-        user_name: userName,
-        detected_triggers: triggers,
-      },
+    const response = await jacClient.spawn('generate_affirmation', {
+      emotion_name: emotion,
+      intensity_score: intensity,
+      user_name: userName,
+      detected_triggers: triggers,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error generating affirmation:', error);
     throw error;
@@ -160,14 +144,11 @@ export const generateAffirmation = async (emotion, intensity, userName = 'Friend
 
 export const findRepeatingTriggers = async (userId, lookbackDays = 30) => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'find_repeating_triggers',
-      ctx: {
-        user_id: userId,
-        lookback_days: lookbackDays,
-      },
+    const response = await jacClient.spawn('find_repeating_triggers', {
+      user_id: userId,
+      lookback_days: lookbackDays,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error finding repeating triggers:', error);
     throw error;
@@ -176,14 +157,11 @@ export const findRepeatingTriggers = async (userId, lookbackDays = 30) => {
 
 export const findCommonEmotions = async (userId, periodDays = 30) => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'find_common_emotions',
-      ctx: {
-        user_id: userId,
-        period_days: periodDays,
-      },
+    const response = await jacClient.spawn('find_common_emotions', {
+      user_id: userId,
+      period_days: periodDays,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error finding common emotions:', error);
     throw error;
@@ -192,14 +170,11 @@ export const findCommonEmotions = async (userId, periodDays = 30) => {
 
 export const calculateEmotionalTrends = async (userId, lookbackDays = 14) => {
   try {
-    const response = await apiClient.post('/api/walker', {
-      walker: 'calculate_emotional_trends',
-      ctx: {
-        user_id: userId,
-        lookback_days: lookbackDays,
-      },
+    const response = await jacClient.spawn('calculate_emotional_trends', {
+      user_id: userId,
+      lookback_days: lookbackDays,
     });
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error calculating trends:', error);
     throw error;
