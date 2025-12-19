@@ -3,9 +3,11 @@ MindMate Harmony Space - Core Walkers
 Implements mood logging, analysis, summaries, and pattern detection with data persistence
 """
 
-# Global storage for mood logs (in-memory for demo)
-glob mood_logs: list = [];
-glob user_moods: dict = {};
+# Node to store mood data persistently on the root node
+node MoodStorage {
+    has mood_logs: list = [];
+    has user_moods: dict = {};
+}
 
 walker log_mood {
     has user_id: str;
@@ -14,6 +16,13 @@ walker log_mood {
     has journal_text: str = "";
 
     can log with entry {
+        # Get or create storage node
+        storage_node = here;
+        if not hasattr(storage_node, 'mood_logs') {
+            storage_node.mood_logs = [];
+            storage_node.user_moods = {};
+        }
+
         # Create mood entry
         entry_data = {
             "user_id": self.user_id,
@@ -23,20 +32,20 @@ walker log_mood {
             "timestamp": "now"
         };
 
-        # Store in global mood logs
-        mood_logs.append(entry_data);
+        # Store in node's mood logs
+        storage_node.mood_logs.append(entry_data);
 
         # Track user's moods
-        if self.user_id not in user_moods {
-            user_moods[self.user_id] = [];
+        if self.user_id not in storage_node.user_moods {
+            storage_node.user_moods[self.user_id] = [];
         }
-        user_moods[self.user_id].append(entry_data);
+        storage_node.user_moods[self.user_id].append(entry_data);
 
         report {
             "status": "success",
             "message": f"Logged {self.mood_name} mood at intensity {self.intensity}",
             "data": entry_data,
-            "total_entries": len(mood_logs)
+            "total_entries": len(storage_node.mood_logs)
         } ;
     }
 }
@@ -76,7 +85,13 @@ walker get_daily_summary {
     has user_id: str;
 
     can summarize with entry {
-        user_entries = user_moods.get(self.user_id, []);
+        # Get storage from root node
+        storage_node = here;
+        if not hasattr(storage_node, 'user_moods') {
+            storage_node.user_moods = {};
+        }
+
+        user_entries = storage_node.user_moods.get(self.user_id, []);
 
         if not user_entries {
             report {
@@ -104,7 +119,13 @@ walker get_weekly_summary {
     has num_days: int = 7;
 
     can summarize with entry {
-        user_entries = user_moods.get(self.user_id, []);
+        # Get storage from root node
+        storage_node = here;
+        if not hasattr(storage_node, 'user_moods') {
+            storage_node.user_moods = {};
+        }
+
+        user_entries = storage_node.user_moods.get(self.user_id, []);
 
         if not user_entries {
             report {
@@ -174,7 +195,13 @@ walker calculate_emotional_trends {
     has lookback_days: int = 14;
 
     can calculate with entry {
-        user_entries = user_moods.get(self.user_id, []);
+        # Get storage from root node
+        storage_node = here;
+        if not hasattr(storage_node, 'user_moods') {
+            storage_node.user_moods = {};
+        }
+
+        user_entries = storage_node.user_moods.get(self.user_id, []);
 
         if len(user_entries) < 3 {
             report {
@@ -227,7 +254,13 @@ walker find_common_emotions {
     has lookback_days: int = 7;
 
     can find_common with entry {
-        user_entries = user_moods.get(self.user_id, []);
+        # Get storage from root node
+        storage_node = here;
+        if not hasattr(storage_node, 'user_moods') {
+            storage_node.user_moods = {};
+        }
+
+        user_entries = storage_node.user_moods.get(self.user_id, []);
 
         if not user_entries {
             report {"common_emotions": [], "period_days": self.lookback_days} ;
