@@ -19,10 +19,10 @@ export default function DailySummary({ userId }) {
 
         if (result && result.current_mood) {
           const recs = await getRecommendations(result.current_mood, result.intensity);
-          setRecommendations(recs.recommendations || []);
+          setRecommendations(recs.recommended_activities || []);
 
           const exercise = await generateBreathingExercise(result.current_mood, result.intensity);
-          setBreathingExercise(exercise.exercise || '');
+          setBreathingExercise(exercise);
         }
       } catch (error) {
         console.error('Error fetching daily summary:', error);
@@ -141,9 +141,20 @@ export default function DailySummary({ userId }) {
 
             {activeTab === 'breathing' && breathingExercise && (
               <div className="breathing-tab">
-                <h4>Guided Breathing Exercise</h4>
+                <h4>{breathingExercise.exercise_name || 'Guided Breathing Exercise'}</h4>
                 <div className="exercise-content">
-                  <p>{breathingExercise}</p>
+                  <p className="exercise-description">{breathingExercise.description}</p>
+                  <div className="exercise-steps">
+                    <h5>Steps:</h5>
+                    <ol>
+                      {breathingExercise.steps && breathingExercise.steps.map((step, index) => (
+                        <li key={index}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                  {breathingExercise.duration_minutes && (
+                    <p className="duration">Duration: {breathingExercise.duration_minutes} minutes</p>
+                  )}
                 </div>
               </div>
             )}

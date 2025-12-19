@@ -13,10 +13,12 @@ const apiClient = axios.create({
 // Helper to call jac serve walker endpoints
 const callWalker = async (walkerName, fields = {}) => {
   try {
-    const response = await apiClient.post(`/walker/${walkerName}`, {
-      nd: 'root',
-      ...fields
-    });
+    const response = await apiClient.post(`/walker/${walkerName}`, fields);
+    // jac serve returns {result: {...}, reports: [...]}
+    // Return the first report if available, otherwise the full response
+    if (response.data && response.data.reports && response.data.reports.length > 0) {
+      return response.data.reports[0];
+    }
     return response.data;
   } catch (error) {
     console.error(`Error calling walker ${walkerName}:`, error);

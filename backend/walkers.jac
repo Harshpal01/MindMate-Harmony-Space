@@ -23,13 +23,13 @@ walker log_mood {
             storage_node.user_moods = {};
         }
 
-        # Create mood entry
+        # Create mood entry with proper ISO timestamp
         entry_data = {
             "user_id": self.user_id,
             "mood_name": self.mood_name,
             "intensity": self.intensity,
             "journal_text": self.journal_text,
-            "timestamp": "now"
+            "timestamp": str(__import__('datetime').datetime.now().isoformat())
         };
 
         # Store in node's mood logs
@@ -98,17 +98,144 @@ walker get_daily_summary {
                 "status": "no_data",
                 "message": "No mood entries found for this user",
                 "current_mood": "Not Yet Logged",
-                "total_entries": 0
+                "total_entries": 0,
+                "triggers": []
             } ;
         } else {
             latest = user_entries[-1];
+            # Analyze triggers from journal entries
+            triggers = [];
+            # Check recent entries for trigger patterns
+            recent_text = "";
+            for entry in user_entries[-5:] {
+                journal = entry.get("journal_text", "");
+                if journal {
+                    recent_text = recent_text + " " + journal.lower();
+                }
+            }
+            # Detect trigger categories
+            if "work" in recent_text
+            or "job" in recent_text
+            or "boss" in recent_text
+            or "deadline" in recent_text {
+                triggers.append("work stress");
+            }
+            if "friend" in recent_text
+            or "family" in recent_text
+            or "relationship" in recent_text
+            or "argument" in recent_text {
+                triggers.append("relationship issues");
+            }
+            if "sleep" in recent_text
+            or "tired" in recent_text
+            or "exhausted" in recent_text {
+                triggers.append("lack of sleep");
+            }
+            if "money" in recent_text
+            or "financial" in recent_text
+            or "bills" in recent_text {
+                triggers.append("financial stress");
+            }
+            if "sick" in recent_text
+            or "pain" in recent_text
+            or "health" in recent_text {
+                triggers.append("health concerns");
+            }
+            # Infer triggers based on CURRENT emotion context (emotion-specific)
+            if len(user_entries) >= 3 {
+                current_emotion = latest["mood_name"].lower();
+                # Only assign triggers relevant to the current emotion
+                if current_emotion == "stressed" {
+                    # Count recent stress patterns
+                    stressed_count = 0;
+                    for entry in user_entries[-5:] {
+                        if entry["mood_name"].lower() == "stressed" {
+                            stressed_count += 1;
+                        }
+                    }
+                    if stressed_count >= 2
+                    and "work or daily pressures" not in triggers {
+                        triggers.append("work or daily pressures");
+                    }
+                    if stressed_count >= 1 and "time management" not in triggers {
+                        triggers.append("time management");
+                    }
+                } elif current_emotion == "anxious" {
+                    # Anxiety-specific triggers
+                    anxious_count = 0;
+                    for entry in user_entries[-5:] {
+                        if entry["mood_name"].lower() == "anxious" {
+                            anxious_count += 1;
+                        }
+                    }
+                    if anxious_count >= 2
+                    and "uncertainty or future worries" not in triggers {
+                        triggers.append("uncertainty or future worries");
+                    }
+                    if anxious_count >= 1 and "stress or pressure" not in triggers {
+                        triggers.append("stress or pressure");
+                    }
+                } elif current_emotion == "sad" {
+                    # Sadness-specific triggers
+                    sad_count = 0;
+                    for entry in user_entries[-5:] {
+                        if entry["mood_name"].lower() == "sad" {
+                            sad_count += 1;
+                        }
+                    }
+                    if sad_count >= 1 and "low energy or motivation" not in triggers {
+                        triggers.append("low energy or motivation");
+                    }
+                    if sad_count >= 2 and "persistent low mood" not in triggers {
+                        triggers.append("persistent low mood");
+                    }
+                } elif current_emotion == "lonely" {
+                    # Loneliness-specific triggers
+                    lonely_count = 0;
+                    for entry in user_entries[-5:] {
+                        if entry["mood_name"].lower() == "lonely" {
+                            lonely_count += 1;
+                        }
+                    }
+                    if lonely_count >= 1
+                    and "lack of social connection" not in triggers {
+                        triggers.append("lack of social connection");
+                    }
+                    if lonely_count >= 2 and "isolation patterns" not in triggers {
+                        triggers.append("isolation patterns");
+                    }
+                } elif current_emotion == "overwhelmed" {
+                    # Overwhelm-specific triggers
+                    overwhelmed_count = 0;
+                    for entry in user_entries[-5:] {
+                        if entry["mood_name"].lower() == "overwhelmed" {
+                            overwhelmed_count += 1;
+                        }
+                    }
+                    if overwhelmed_count >= 1
+                    and "too many responsibilities" not in triggers {
+                        triggers.append("too many responsibilities");
+                    }
+                    if overwhelmed_count >= 2
+                    and "difficulty prioritizing" not in triggers {
+                        triggers.append("difficulty prioritizing");
+                    }
+                } elif current_emotion == "angry" {
+                    # Anger-specific triggers
+                    if "frustration or conflict" not in triggers {
+                        triggers.append("frustration or conflict");
+                    }
+                }
+                # Positive emotions (happy, content, peaceful, excited, calm) show no negative triggers
+            }
             report {
                 "status": "success",
                 "current_mood": latest["mood_name"],
                 "intensity": latest["intensity"],
                 "journal_text": latest.get("journal_text", ""),
                 "timestamp": latest["timestamp"],
-                "total_entries": len(user_entries)
+                "total_entries": len(user_entries),
+                "triggers": triggers
             } ;
         }
     }
@@ -158,15 +285,70 @@ walker recommend_activities {
 
     can recommend with entry {
         activities = {
-            "sad": ["Take a walk", "Listen to uplifting music", "Call a friend"],
-            "stressed": ["Deep breathing", "Meditation", "Exercise"],
-            "anxious": ["Progressive muscle relaxation", "Journaling", "Nature walk"],
-            "happy": ["Share your joy", "Creative activity", "Help someone"],
-            "angry": ["Physical exercise", "Cool down time", "Express feelings safely"]
+            "sad": [
+                "Take a walk in nature",
+                "Listen to uplifting music",
+                "Call a friend or family member"
+            ],
+            "stressed": [
+                "Deep breathing exercises",
+                "Meditation or mindfulness",
+                "Light exercise or stretching"
+            ],
+            "anxious": [
+                "Progressive muscle relaxation",
+                "Journaling your thoughts",
+                "Nature walk or time outdoors"
+            ],
+            "happy": [
+                "Share your joy with others",
+                "Creative activity or hobby",
+                "Help someone in need"
+            ],
+            "angry": [
+                "Physical exercise",
+                "Cool down time alone",
+                "Express feelings in a healthy way"
+            ],
+            "overwhelmed": [
+                "Break tasks into smaller steps",
+                "Take a short break",
+                "Prioritize what's most important"
+            ],
+            "lonely": [
+                "Reach out to a friend",
+                "Join a community activity",
+                "Video call a loved one"
+            ],
+            "excited": [
+                "Channel energy into creative work",
+                "Share your excitement",
+                "Plan something fun"
+            ],
+            "calm": [
+                "Enjoy the moment",
+                "Practice gratitude",
+                "Gentle yoga or stretching"
+            ],
+            "content": [
+                "Reflect on positive aspects",
+                "Continue healthy routines",
+                "Express gratitude"
+            ],
+            "peaceful": [
+                "Meditation or quiet reflection",
+                "Read something inspiring",
+                "Spend time in nature"
+            ]
         };
 
         suggestions = activities.get(
-            self.emotion_name.lower(), ["Rest", "Self-care", "Reach out for support"]
+            self.emotion_name.lower(),
+            [
+                "Rest and self-care",
+                "Talk to someone you trust",
+                "Do something that brings you comfort"
+            ]
         );
 
         report {
@@ -206,24 +388,29 @@ walker calculate_emotional_trends {
         if len(user_entries) < 3 {
             report {
                 "trend": "stable",
-                "stability_score": 80.0,
+                "stability_score": 0.8,
                 "volatility": "low",
                 "explanation": "Need more data to determine trends"
             } ;
         } else {
             # Classify emotions as positive/negative
+            # Classify emotions as positive/negative
             positive_emotions = {"happy","calm","content","peaceful","excited","grateful","confident"};
             negative_emotions = {"sad","anxious","stressed","overwhelmed","angry","frustrated","lonely"};
             positive_count = 0;
             negative_count = 0;
+            intensities = [];
             for entry in user_entries {
                 mood = entry["mood_name"].lower();
+                intensities.append(entry["intensity"]);
                 if mood in positive_emotions {
                     positive_count += 1;
                 } elif mood in negative_emotions {
                     negative_count += 1;
                 }
             }
+            # Calculate trend
+            # Calculate trend
             total = positive_count + negative_count;
             if total > 0 {
                 positive_ratio = positive_count / total;
@@ -237,10 +424,31 @@ walker calculate_emotional_trends {
             } else {
                 trend = "stable";
             }
+            # Calculate stability score based on intensity variance
+            # Calculate stability score based on intensity variance
+            avg_intensity = sum(intensities) / len(intensities);
+            variance = sum([(x - avg_intensity) ** 2 for x in intensities]) / len(
+                intensities
+            );
+            std_dev = variance ** 0.5;
+            # Normalize: lower std_dev = higher stability (scale 0-1)
+            # Normalize: lower std_dev = higher stability (scale 0-1)
+            # Max expected std_dev around 3-4 for 1-10 scale
+            # Max expected std_dev around 3-4 for 1-10 scale
+            stability_score = max(0.0, min(1.0, 1.0 - (std_dev / 4.0)));
+            # Determine volatility category
+            # Determine volatility category
+            if std_dev < 1.5 {
+                volatility = "low";
+            } elif std_dev < 2.5 {
+                volatility = "medium";
+            } else {
+                volatility = "high";
+            }
             report {
                 "trend": trend,
-                "stability_score": 80.0,
-                "volatility": "low",
+                "stability_score": stability_score,
+                "volatility": volatility,
                 "positive_count": positive_count,
                 "negative_count": negative_count,
                 "explanation": f"Based on {len(user_entries)} entries: {positive_count} positive, {negative_count} negative"
@@ -255,6 +463,7 @@ walker find_common_emotions {
 
     can find_common with entry {
         # Get storage from root node
+        # Get storage from root node
         storage_node = here;
         if not hasattr(storage_node, 'user_moods') {
             storage_node.user_moods = {};
@@ -266,11 +475,13 @@ walker find_common_emotions {
             report {"common_emotions": [], "period_days": self.lookback_days} ;
         } else {
             # Count emotion frequencies
+            # Count emotion frequencies
             emotion_counts = {};
             for entry in user_entries {
                 mood = entry["mood_name"];
                 emotion_counts[mood] = emotion_counts.get(mood, 0) + 1;
             }
+            # Convert to list of tuples
             # Convert to list of tuples
             common_list = [];
             for item in emotion_counts.items() {
@@ -311,13 +522,17 @@ walker get_daily_affirmation {
 }
 
 # ============================================================================
+# ============================================================================
 # AI AGENT WALKERS (from agents.jac)
+# AI AGENT WALKERS (from agents.jac)
+# ============================================================================
 # ============================================================================
 walker emotion_from_text {
     has journal_text: str;
     has user_id: str = "";
 
     can extract_emotions with entry {
+        # Simple emotion extraction from text
         # Simple emotion extraction from text
         emotions = [];
         intensity = 5.0;
@@ -346,6 +561,7 @@ walker emotion_from_text {
             intensity = 8.0;
         }
 
+        # Detect triggers
         # Detect triggers
         if "work" in text_lower {
             triggers.append("work stress");
