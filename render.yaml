@@ -4,6 +4,7 @@ services:
     runtime: python
     buildCommand: cd backend && pip install -r requirements.txt
     startCommand: cd backend && jac serve walkers.jac -p $PORT
+    healthCheckPath: /walkers
     envVars:
       - key: PYTHONUNBUFFERED
         value: true
