@@ -2,7 +2,13 @@
 
 A compassionate AI-powered emotional wellness companion designed to help users track moods, understand emotional patterns, and receive personalized AI-generated support using Jaseci's Object-Spatial Graph (OSP), walkers, and byLLM intelligence.
 
-## 🎯 Project Overview
+## � Demo Video
+
+**[Watch the Demo Video Here](https://drive.google.com/file/d/1Nkj72sAz7G5QHL_zmcoNLTXvX4Ep6pez/view?usp=sharing)**
+
+> See the full walkthrough of MindMate Harmony Space features, including mood logging, AI-generated insights, and emotional trend analysis.
+
+## �🎯 Project Overview
 
 **MindMate Harmony Space** is built on the Jaseci framework and features:
 
