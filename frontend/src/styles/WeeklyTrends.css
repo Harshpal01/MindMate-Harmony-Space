@@ -89,15 +89,29 @@
 }
 
 .trend-improving {
-  color: #6bcf7f;
+  color: #10b981 !important;
+  font-weight: 700;
 }
 
 .trend-declining {
-  color: #ff6b6b;
+  color: #ef4444 !important;
+  font-weight: 700;
 }
 
 .trend-stable {
-  color: #ffd93d;
+  color: #f59e0b !important;
+  font-weight: 700;
+}
+
+.trend-explanation {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.6;
+  border-left: 3px solid #10b981;
 }
 
 /* Summary Card */

@@ -127,6 +127,9 @@ export default function WeeklyTrends({ userId }) {
                 </p>
               </div>
             </div>
+            {trendData.explanation && (
+              <p className="trend-explanation">{trendData.explanation}</p>
+            )}
           </div>
         )}
 

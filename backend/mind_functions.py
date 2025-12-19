@@ -220,8 +220,28 @@ def count_emotion_frequencies(emotions_list):
     return freq
 
 def analyze_trends(emotion_counts):
-    """Analyze trend from emotion counts"""
-    return "stable"
+    """Analyze trend from emotion counts - classify emotions as positive/negative"""
+    # Classify emotions
+    positive_emotions = {'happy', 'calm', 'content', 'peaceful', 'excited', 'grateful', 'confident', 'joyful', 'relaxed', 'energized'}
+    negative_emotions = {'sad', 'anxious', 'stressed', 'overwhelmed', 'angry', 'frustrated', 'lonely', 'worried', 'depressed', 'fearful'}
+    
+    positive_count = sum(count for emotion, count in emotion_counts.items() if emotion.lower() in positive_emotions)
+    negative_count = sum(count for emotion, count in emotion_counts.items() if emotion.lower() in negative_emotions)
+    
+    # Calculate ratio
+    total = positive_count + negative_count
+    if total == 0:
+        return "stable"
+    
+    positive_ratio = positive_count / total
+    
+    # Determine trend
+    if positive_ratio >= 0.6:
+        return "improving"
+    elif positive_ratio <= 0.4:
+        return "declining"
+    else:
+        return "stable"
 
 def generate_habit_recommendations(trends):
     """Generate habit recommendations from trends"""
