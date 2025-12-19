@@ -84,12 +84,12 @@
 ```
 ┌─ Mood Management
 │  ├─ log_mood
-│  ├─ analyze_journal
-│  └─ update_graph
+│  └─ analyze_journal
 │
 ├─ Summaries
 │  ├─ get_daily_summary
 │  ├─ get_weekly_summary
+│  ├─ get_daily_affirmation
 │  └─ generate_weekly_reflection
 │
 ├─ Recommendations
@@ -101,11 +101,12 @@
 │  ├─ find_common_emotions
 │  └─ calculate_emotional_trends
 │
-└─ LLM Agents
+└─ LLM Agents (byLLM)
    ├─ emotion_from_text (Analytical)
    ├─ generate_support_message (Generative)
    ├─ generate_breathing_exercise (Generative)
-   └─ generate_affirmation (Generative)
+   ├─ generate_affirmation (Generative)
+   └─ suggest_habit_improvements (Generative)
 ```
 
 ### 3. OSP Graph Structure
@@ -264,29 +265,22 @@ Please provide:
 1. User selects mood, intensity, and writes journal entry
    └─> MoodLogger component captures data
 
-2. Frontend calls log_mood walker via Spawn()
-   └─> {user_id, mood_name, intensity, journal_text}
+2. Frontend calls log_mood walker
+   └─> POST /walker/log_mood {user_id, mood_name, intensity, journal_text}
 
 3. log_mood walker:
-   a. Creates emotion node with timestamp
-   b. Creates journal_entry node
-   c. Connects entry → emotion [entry_emotion]
-   d. Stores in Jaseci graph store
-   └─> Returns {status: "success", ...}
+   a. Creates mood entry with ISO timestamp
+   b. Stores on Jaseci root node (here keyword)
+   c. Appends to mood_logs and user_moods arrays
+   └─> Returns {status: "success", data: {...}}
 
 4. Frontend simultaneously calls emotion_from_text walker
-   └─> Analytical LLM extracts emotions, triggers, keywords
+   └─> Analytical byLLM extracts emotions, triggers, keywords
 
-5. update_graph walker:
-   a. Creates relationships between emotion → triggers
-   b. Creates relationships emotion → activities
-   c. Creates relationships emotion → suggestions
-   └─> Returns relationship count
+5. Frontend calls generate_support_message walker
+   └─> Generative byLLM creates empathetic response
 
-6. Frontend calls generate_support_message walker
-   └─> Generative LLM creates empathetic response
-
-7. Display support message and recommendations to user
+6. Display support message and recommendations to user
 ```
 
 ### Workflow: User Requests Daily Summary
@@ -296,7 +290,7 @@ Please provide:
    └─> DailySummary component mounts
 
 2. Component calls get_daily_summary walker
-   └─> Graph query: get latest emotion entry for user
+   └─> Query: get latest mood entry from root node storage
 
 3. Walker traverses graph:
    a. Find latest emotion node
@@ -399,7 +393,13 @@ CREATE TABLE emotion_trigger_edges (
 
 ## LLM Integration
 
-**Supported Providers:**
+**Jaseci byLLM System:**
+
+- **Built-in LLM capabilities** via `by llm(method="Reason")` and `by llm(method="Generate")`
+- **Analytical Mode**: `method="Reason"` for emotion extraction
+- **Generative Mode**: `method="Generate"` for support messages, exercises, affirmations
+
+**Supported Providers (via config.py):**
 
 - OpenAI (GPT-3.5, GPT-4)
 - Ollama (Local inference)
@@ -413,20 +413,14 @@ OPENAI_API_KEY = "sk-..."
 OPENAI_MODEL = "gpt-3.5-turbo"
 ```
 
-**API Integration Pattern:**
+**byLLM Usage in agents.jac:**
 
-```python
-# In agents.jac
-response = requests.post(
-    LLM_ENDPOINT,
-    headers={"Authorization": f"Bearer {LLM_API_KEY}"},
-    json={
-        "model": LLM_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": temperature,
-        "max_tokens": max_tokens
-    }
-)
+```jac
+# Analytical agent
+can analyze_emotion(text: str) by llm(method="Reason");
+
+# Generative agent
+can generate_support(emotion: str, intensity: float) by llm(method="Generate");
 ```
 
 ---
@@ -528,16 +522,19 @@ Frontend Error
 
 ```bash
 # Backend
-cd backend && python seed_database.py
-jsctl -m jaseci_serv start
+cd backend
+pip install -r requirements.txt
+jac serve walkers.jac -p 8000
 
 # Frontend
-cd frontend && npm start
+cd frontend
+npm install
+npm start
 ```
 
-**Production:**
+**Production (Render):**
 
-- Docker containerization for backend and frontend
-- Kubernetes orchestration (optional)
-- CI/CD pipeline via GitHub Actions
-- Database backups and monitoring
+- Backend: `jac serve walkers.jac -p ${PORT:-8000}`
+- Health check: GET `/walkers` endpoint
+- Session persistence: walkers.session (SQLite)
+- Live URL: https://mindmate-backend-9kok.onrender.com

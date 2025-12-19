@@ -8,10 +8,10 @@ This guide shows how to run a complete demo of the system covering all core feat
 
 ## Prerequisites
 
-- Python 3.8+
-- Node.js 14+
+- Python 3.10+
+- Node.js 16+
 - Git
-- Postman (optional, for API testing)
+- JacLang v0.9.3 (`pip install jaclang==0.9.3`)
 
 ---
 
@@ -24,52 +24,14 @@ cd backend
 pip install -r requirements.txt
 ```
 
-### Step 2: Configure Environment
-
-Create a `.env` file in the `backend` folder:
-
-```env
-# LLM Configuration (choose one provider)
-LLM_PROVIDER=openai
-OPENAI_API_KEY=sk-your-key-here
-OPENAI_MODEL=gpt-3.5-turbo
-
-# Or use Ollama (local)
-# LLM_PROVIDER=ollama
-# OLLAMA_ENDPOINT=http://localhost:11434
-
-# Database
-DATABASE_URL=sqlite:///mindmate.db
-
-# Jaseci
-JASECI_HOST=localhost
-JASECI_PORT=5000
-
-# Frontend
-FRONTEND_URL=http://localhost:3000
-```
-
-### Step 3: Initialize Database & Load Seed Data
+### Step 2: Start Jaseci Server
 
 ```bash
-python seed_data.py
+# Start the backend with jac serve
+jac serve walkers.jac -p 8000
 ```
 
-This will create:
-
-- Preloaded emotions (10 emotions with emojis)
-- Preloaded triggers (10 common triggers)
-- Preloaded activities (10 coping activities)
-- Preloaded suggestions (8 breathing exercises, affirmations, tips)
-- Sample journal entries for testing
-
-### Step 4: Start Jaseci Server
-
-```bash
-jsctl -m jaseci_serv start
-```
-
-Server starts at: `http://localhost:5000`
+Server starts at: `http://localhost:8000`
 
 ---
 
@@ -82,23 +44,19 @@ cd frontend
 npm install
 ```
 
-### Step 2: Configure Environment
-
-Create a `.env` file in the `frontend` folder:
-
-```env
-REACT_APP_JASECI_API_URL=http://localhost:5000
-REACT_APP_JASECI_WALKER_PATH=/api/walker
-REACT_APP_BACKEND_URL=http://localhost:5000
-```
-
-### Step 3: Start Development Server
+### Step 2: Start Development Server
 
 ```bash
 npm start
 ```
 
 Frontend opens at: `http://localhost:3000`
+
+**Note**: Update API endpoint in `src/services/api.js` if needed:
+
+```javascript
+const API_BASE_URL = "http://localhost:8000";
+```
 
 ---
 
@@ -126,12 +84,12 @@ Frontend opens at: `http://localhost:3000`
 **What happens:**
 
 - ✅ Frontend logs mood via `log_mood` walker
-- ✅ Analytical LLM analyzes journal text via `emotion_from_text` walker
+- ✅ Data stored on Jaseci root node with ISO timestamp
+- ✅ Analytical byLLM analyzes journal text via `emotion_from_text` walker
   - Extracts: anxious, stressed
   - Identifies triggers: work feedback, poor sleep
   - Calculates intensity: 7.8/10
-- ✅ Graph updated with emotion → trigger relationships
-- ✅ Generative LLM creates empathetic support message via `generate_support_message`
+- ✅ Generative byLLM creates empathetic support message via `generate_support_message`
 - ✅ Success screen displays support message
 
 **Expected Output:**
@@ -176,8 +134,8 @@ You're capable of learning and growing from this. Be kind to yourself."
 
 **What happens:**
 
-- ✅ `get_daily_summary` walker queries latest mood
-- ✅ Graph traversal finds related triggers and activities
+- ✅ `get_daily_summary` walker queries latest mood from root node
+- ✅ Returns emotion, triggers, and recommendations
 - ✅ `generate_breathing_exercise` creates personalized exercise
 - ✅ Frontend displays interactive tabs
 
@@ -216,10 +174,10 @@ You're capable of learning and growing from this. Be kind to yourself."
 
 **What happens:**
 
-- ✅ `get_weekly_summary` returns emotion frequencies and analysis
-- ✅ `findCommonEmotions` provides distribution data
-- ✅ `calculateEmotionalTrends` computes trend metrics
-- ✅ Recharts renders bar chart visualization
+- ✅ `get_weekly_summary` returns emotion frequencies and stability score
+- ✅ `find_common_emotions` provides distribution data
+- ✅ `calculate_emotional_trends` computes trend metrics
+- ✅ Recharts renders bar chart visualization with rotated labels
 
 **Demo Data (Sample from seed):**
 
@@ -250,94 +208,82 @@ Recommended Actions:
 
 ---
 
-## PART 4: API TESTING (Optional - Postman)
+## PART 4: API TESTING (Optional - PowerShell)
 
 ### Test 1: Log Multiple Moods
 
-Create Postman requests for different moods to build historical data:
+Use PowerShell to log different moods and build historical data:
 
 **Request 1: Happy**
 
-```json
-{
-  "walker": "log_mood",
-  "ctx": {
-    "user_id": "user_001",
-    "mood_name": "happy",
-    "intensity": 8,
-    "journal_text": "Great day today! Finished my project and got positive feedback. Feeling accomplished!"
-  }
-}
+```powershell
+$body = @{
+  user_id = "user_001"
+  mood_name = "happy"
+  intensity = 8
+  journal_text = "Great day today! Finished my project and got positive feedback. Feeling accomplished!"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri 'http://localhost:8000/walker/log_mood' -Method Post -Body $body -ContentType 'application/json'
 ```
 
 **Request 2: Peaceful**
 
-```json
-{
-  "walker": "log_mood",
-  "ctx": {
-    "user_id": "user_001",
-    "mood_name": "peaceful",
-    "intensity": 8,
-    "journal_text": "Had a wonderful morning meditation and yoga session. Feeling centered and grounded."
-  }
-}
+```powershell
+$body = @{
+  user_id = "user_001"
+  mood_name = "peaceful"
+  intensity = 8
+  journal_text = "Had a wonderful morning meditation and yoga session. Feeling centered and grounded."
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri 'http://localhost:8000/walker/log_mood' -Method Post -Body $body -ContentType 'application/json'
 ```
 
 **Request 3: Stressed**
 
-```json
-{
-  "walker": "log_mood",
-  "ctx": {
-    "user_id": "user_001",
-    "mood_name": "stressed",
-    "intensity": 6,
-    "journal_text": "Too many things to do, not enough time. Feeling the pressure mount."
-  }
-}
+```powershell
+$body = @{
+  user_id = "user_001"
+  mood_name = "stressed"
+  intensity = 6
+  journal_text = "Too many things to do, not enough time. Feeling the pressure mount."
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri 'http://localhost:8000/walker/log_mood' -Method Post -Body $body -ContentType 'application/json'
 ```
 
 ### Test 2: Get Recommendations
 
-```
-POST http://localhost:5000/api/walker
+```powershell
+$body = @{
+  emotion_name = "anxious"
+  intensity = 7.5
+} | ConvertTo-Json
 
-{
-  "walker": "recommend_activities",
-  "ctx": {
-    "emotion_name": "anxious",
-    "intensity": 7.5
-  }
-}
+Invoke-RestMethod -Uri 'http://localhost:8000/walker/recommend_activities' -Method Post -Body $body -ContentType 'application/json'
 ```
 
 ### Test 3: Generate Breathing Exercise
 
-```
-POST http://localhost:5000/api/walker
+```powershell
+$body = @{
+  emotion_name = "anxious"
+  intensity_score = 8
+  duration_preference = 300
+} | ConvertTo-Json
 
-{
-  "walker": "generate_breathing_exercise",
-  "ctx": {
-    "emotion_name": "anxious",
-    "intensity_score": 8,
-    "duration_preference": 300
-  }
-}
+Invoke-RestMethod -Uri 'http://localhost:8000/walker/generate_breathing_exercise' -Method Post -Body $body -ContentType 'application/json'
 ```
 
 ### Test 4: Get Weekly Summary
 
-```
-POST http://localhost:5000/api/walker
+```powershell
+$body = @{
+  user_id = "user_001"
+} | ConvertTo-Json
 
-{
-  "walker": "get_weekly_summary",
-  "ctx": {
-    "user_id": "user_001"
-  }
-}
+Invoke-RestMethod -Uri 'http://localhost:8000/walker/get_weekly_summary' -Method Post -Body $body -ContentType 'application/json'
 ```
 
 ---
@@ -448,13 +394,12 @@ using Spawn()."
 
 Run multiple mood logs before demo to have meaningful weekly trends data.
 
-### Tip 2: Use Ollama for Local LLM (No API Key Needed)
+### Tip 2: Configure byLLM Provider (Optional)
 
 ```bash
-# Install Ollama: https://ollama.ai
-# Pull a model: ollama pull mistral
-# Start: ollama serve
-# Set in backend/.env: LLM_PROVIDER=ollama
+# Configure LLM provider in backend/config.py
+# Options: OpenAI, Ollama, Anthropic
+# See config.py for API key setup
 ```
 
 ### Tip 3: Record Demo with Screen Capture
@@ -470,26 +415,24 @@ Run multiple mood logs before demo to have meaningful weekly trends data.
 
 ```bash
 # Check backend is running
-curl http://localhost:5000/health
+curl http://localhost:8000/walkers
 
-# Check frontend .env has correct URL
-cat frontend/.env
+# Check frontend api.js has correct URL
+# Should be: const API_BASE_URL = 'http://localhost:8000';
 ```
 
-**Issue: LLM Timeout**
+**Issue: byLLM Not Responding**
 
 ```bash
-# Check API key is valid
-# Increase timeout in config.py: LLM_TIMEOUT = 30
-
-# Or use Ollama (local, no timeout issues)
+# Check LLM configuration in backend/config.py
+# Verify API keys are set if using external providers
 ```
 
 **Issue: Empty Weekly Summary**
 
 ```bash
 # Need multiple mood entries. Log several moods first:
-# Log happy, anxious, stressed, peaceful, calm entries
+# Use PowerShell commands from PART 4 to log moods
 # Then weekly summary will have data
 ```
 
