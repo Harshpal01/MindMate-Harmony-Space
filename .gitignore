@@ -71,6 +71,10 @@ htmlcov/
 *.mp4
 *.mov
 
+# Jaseci session files
+*.session
+*.session.*
+
 # Temporary files
 temp/
 tmp/
