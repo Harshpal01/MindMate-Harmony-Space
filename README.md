@@ -83,52 +83,59 @@ Journal Entries
 
 ## 🚀 Core Walkers
 
+**15 Walkers** implemented in `walkers.jac`:
+
 ### Mood & Logging Walkers
 
-- **`log_mood`** - Records mood entry and updates OSP graph
-- **`analyze_journal`** - Sends journaling text to analytical LLM
-- **`update_graph`** - Creates relationships between emotions, triggers, activities
+- **`log_mood`** - Records mood entry with timestamp and stores in root node
+- **`analyze_journal`** - Analyzes journal text for emotional insights
 
 ### Summary & Recommendation Walkers
 
-- **`get_daily_summary`** - Returns current emotional state + AI suggestions
-- **`get_weekly_summary`** - Graph-based emotional trend report
-- **`recommend_activities`** - Uses mood→activity edges for coping habit suggestions
+- **`get_daily_summary`** - Returns emotional state with triggers and recommendations
+- **`get_weekly_summary`** - Weekly emotional trend report with stability score
+- **`recommend_activities`** - Suggests coping activities based on current mood
+- **`get_daily_affirmation`** - Provides daily personalized affirmation
 
-### LLM Integration Walkers
+### LLM Integration Walkers (byLLM)
 
 - **`emotion_from_text`** - Analytical LLM: extracts emotion data from text
 - **`generate_support_message`** - Generative LLM: creates empathetic responses
 - **`generate_breathing_exercise`** - Generative LLM: creates personalized breathing guides
+- **`generate_affirmation`** - Generative LLM: creates personalized affirmations
+- **`generate_weekly_reflection`** - Generative LLM: creates weekly emotional summary
+- **`suggest_habit_improvements`** - Generative LLM: suggests lifestyle improvements
 
 ### Graph Analysis Walkers
 
 - **`find_repeating_triggers`** - Identifies most common emotional triggers
 - **`find_common_emotions`** - Detects prevalent mood patterns
-- **`calculate_emotional_trends`** - Computes emotional trajectory over time
+- **`calculate_emotional_trends`** - Computes emotional trajectory and stability score
 
 ## 🛠️ Tech Stack
 
 ### Backend
 
-- **Jaseci + Jac** - OSP graph and walker definitions (mindmate.jac, walkers.jac, agents.jac)
-- **Python + Flask** - HTTP server (`backend/jaseci_server.py`) exposing `/api/walker` and `/health`
-- **Mock Graph/LLM Mode** - Safe in-memory graph + rule-based responses when no external LLM is configured
-- **Google Gemini** - Primary generative provider for support messages via `GOOGLE_API_KEY` (when set)
-- **OpenAI / Ollama / Anthropic** - Additional providers defined in `backend/config.py` (not required for this demo)
+- **Jaseci v0.9.3 + JacLang** - OSP graph and walker definitions (mindmate.jac, walkers.jac, agents.jac, app.jac)
+- **jac serve** - Built-in Jaseci HTTP server exposing walker endpoints
+- **byLLM Integration** - Built-in Jaseci LLM capabilities (analytical and generative modes)
+- **Python** - Helper functions and configuration (config.py, mind_functions.py, seed_data.py)
 
 ### Frontend
 
-- **React** - UI library
-- **jac-client** - Official Jaseci client library for Spawn() walker calls
-- **Axios** - Fallback HTTP client for non-walker endpoints
+- **React 18** - UI library
+- **Axios** - HTTP client for walker API calls
+- **jac-client** - Official Jaseci client library (installed as dependency)
 - **Recharts** - Emotional trend visualization
-- **Tailwind CSS** - Styling
+- **React Icons** - Icon components
+- **Emoji Picker React** - Emoji selection for mood logging
+- **Custom CSS** - Component-specific styling
 
 ### Database / Storage
 
-- **In-memory log + simple persistence** for demo (`MOOD_LOG`, seed data)
-- **Jaseci Graph Store** prepared via Jac files for future full graph persistence
+- **Root Node Storage** - Persistent data stored on Jaseci root node using `here` keyword
+- **Session File** - walkers.session (SQLite-based, auto-generated)
+- **OSP Graph** - Full graph structure defined in mindmate.jac with 7 node types and 6 edge types
 
 ## 📋 Project Structure
 
@@ -184,10 +191,10 @@ MindMate-Harmony-Space/
 
 ### Prerequisites
 
-- Python 3.8+
-- Node.js 14+
+- Python 3.10+
+- Node.js 16+
 - pip & npm
-- Jaseci CLI (`pip install jaseci`)
+- JacLang v0.9.3 (`pip install jaclang==0.9.3`)
 
 ### Backend Setup (Local)
 
@@ -197,12 +204,11 @@ cd backend
 # Install dependencies
 pip install -r requirements.txt
 
-# (Optional) Set GOOGLE_API_KEY if you want real Gemini-powered support messages
-set GOOGLE_API_KEY=your_real_key_here        # Windows PowerShell: $env:GOOGLE_API_KEY="..."
-
-# Start Flask backend (Jaseci mock mode + Gemini integration)
-python jaseci_server.py
+# Start Jaseci server with walkers
+jac serve walkers.jac -p 8000
 ```
+
+Backend will be available at `http://localhost:8000`
 
 ### Frontend Setup
 
@@ -212,14 +218,17 @@ cd frontend
 # Install dependencies
 npm install
 
-# Create .env file
-cp .env.example .env
-
 # Start React dev server
 npm start
 ```
 
-The frontend will be available at `http://localhost:3000`
+Frontend will be available at `http://localhost:3000`
+
+**Note**: Update API endpoint in `src/services/api.js` if needed:
+
+```javascript
+const API_BASE_URL = "http://localhost:8000";
+```
 
 ## 📊 Example Workflow
 
@@ -231,74 +240,74 @@ The frontend will be available at `http://localhost:3000`
 6. **Daily Summary**: Provides emotional check-in with personalized recommendations
 7. **Weekly Report**: Shows emotional trends and suggests stress-management activities
 
-## 🧪 Testing & Evaluation
-
-### Evaluation Metrics
-
-- **Emotion Classification Accuracy**: LLM self-evaluation comparing extracted emotions to provided mood
-- **Suggestion Relevance**: User feedback ratings on helpfulness of AI-generated coping strategies
-- **Graph Pattern Detection**: Validation of identified triggers against user's actual stress patterns
-- **User Satisfaction**: NPS-style scoring of emotional support quality
+## 🧪 Testing & Demo Data
 
 ### Sample Test Data
 
-Included in `examples/sample_moods.json` and `examples/sample_journals.json`:
+Included in `examples/seed_data.json`:
 
-- 15 pre-written mood entries
-- 10 sample journal entries with varying emotional tones
-- Expected emotion classifications and triggers
+- Pre-configured emotions (Happy, Sad, Anxious, Stressed, etc.)
+- Sample triggers and activities
+- Initial suggestions for mood support
+- Test mood logs for demonstration
 
-## 📹 Demo Video
+### Testing the API
 
-The demo showcases:
+You can test walkers using PowerShell:
 
-1. ✅ Logging a mood with emoji picker and journal text
-2. ✅ Real-time byLLM emotional analysis
-3. ✅ Graph updates showing emotion-trigger-activity relationships
-4. ✅ byLLM-generated coping strategies and breathing exercises
-5. ✅ Daily emotional summary with personalized recommendations
-6. ✅ Weekly trend report with pattern detection
-7. ✅ Interactive frontend using Spawn() for walker calls
+```powershell
+# Test log_mood walker
+$body = @{user_id='test_user'; mood_name='happy'; intensity=7; journal_text='Feeling great today!'} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:8000/walker/log_mood' -Method Post -Body $body -ContentType 'application/json'
 
-**[Demo Video Link - To be added after recording]**
+# Test get_weekly_summary walker
+$body = @{user_id='test_user'} | ConvertTo-Json
+Invoke-RestMethod -Uri 'http://localhost:8000/walker/get_weekly_summary' -Method Post -Body $body -ContentType 'application/json'
+```
+
+## 📹 Demo Features
+
+The application demonstrates:
+
+1. ✅ Mood logging with emoji picker and intensity slider
+2. ✅ Real-time byLLM emotional analysis from journal text
+3. ✅ Daily summary with emotion-specific triggers and recommendations
+4. ✅ byLLM-generated breathing exercises (structured with steps and duration)
+5. ✅ Weekly trend visualization with emotion distribution chart
+6. ✅ Emotional stability score calculation
+7. ✅ Persistent data storage on Jaseci root node
+8. ✅ 15 fully functional walkers with OSP graph integration
 
 ## 🔧 Configuration
 
-### Backend LLM Configuration
+### Backend Configuration
 
-Most of the byLLM configuration lives in `backend/agents.jac` and `backend/config.py`. For this deployed demo:
+byLLM settings are defined in `backend/agents.jac` using Jaseci's built-in LLM capabilities:
 
-- **Gemini Support Messages**
+- **Analytical Agent**: Uses `by llm(method="Reason")` for emotion analysis
+- **Generative Agents**: Use `by llm(method="Generate")` for support messages, breathing exercises, affirmations
+- **Configuration**: LLM provider options in `backend/config.py` (OpenAI, Ollama, Anthropic)
 
-  - Env var: `GOOGLE_API_KEY`
-  - Used by: `handle_generate_support_message` in `backend/jaseci_server.py`
-  - Behavior: When `GOOGLE_API_KEY` is present, support messages are generated by Gemini (`gemini-1.5-flash`); otherwise, fallback rule-based messages are used.
+### Frontend API Configuration
 
-- **Other Providers (optional)**
-  - `LLM_PROVIDER` / `OPENAI_API_KEY` / `OLLAMA_ENDPOINT` / `ANTHROPIC_API_KEY` are defined in `backend/config.py` but are not required for this Render demo.
+API endpoint is set in `frontend/src/services/api.js`:
 
-### Frontend API Base URL
+- **Local Development**:
 
-The frontend talks to the backend via `REACT_APP_JASECI_API_URL`:
-
-- Local dev:
-
-  ```env
-  REACT_APP_JASECI_API_URL=http://localhost:5000
+  ```javascript
+  const API_BASE_URL = "http://localhost:8000";
   ```
 
-- Render deployment (current):
-
-  ```env
-  REACT_APP_JASECI_API_URL=https://mindmate-backend-9kok.onrender.com
+- **Production (Render)**:
+  ```javascript
+  const API_BASE_URL = "https://mindmate-backend-9kok.onrender.com";
   ```
 
-This is wired in `frontend/src/services/api.js` via:
+### Deployment
 
-```javascript
-const API_BASE_URL =
-  process.env.REACT_APP_JASECI_API_URL || "http://localhost:5000";
-```
+- **Backend**: Deployed on Render at https://mindmate-backend-9kok.onrender.com
+- **Command**: `jac serve walkers.jac -p ${PORT:-8000}`
+- **Health Check**: GET `/walkers` endpoint
 
 ## 📚 Documentation
 
@@ -323,8 +332,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with [Jaseci](https://jaseci.org/) framework
-- Powered by OpenAI's GPT models (or Ollama)
+- Built with [Jaseci](https://jaseci.org/) framework (JacLang v0.9.3)
+- Powered by Jaseci's byLLM capabilities
+- Deployed on [Render](https://render.com/)
 - Inspired by mental health and wellness best practices
 
 ---
