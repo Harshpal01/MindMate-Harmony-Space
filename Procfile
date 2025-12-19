@@ -1,1 +1,1 @@
-web: cd backend && jac serve app.jac -p ${PORT:-8000}
+web: cd backend && jac serve walkers.jac -p ${PORT:-8000}

@@ -3,7 +3,7 @@ services:
     name: mindmate-backend
     runtime: python
     buildCommand: cd backend && pip install -r requirements.txt
-    startCommand: cd backend && jac serve app.jac -p $PORT
+    startCommand: cd backend && jac serve walkers.jac -p $PORT
     envVars:
       - key: PYTHONUNBUFFERED
         value: true
