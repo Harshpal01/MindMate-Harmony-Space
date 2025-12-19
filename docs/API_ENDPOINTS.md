@@ -2,30 +2,29 @@
 
 ## MindMate Harmony Space - Complete Walker API Reference
 
-All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
+All walkers are called via HTTP POST to `/walker/{walker_name}` endpoints.
+
+**Base URL (Local):** `http://localhost:8000`  
+**Base URL (Production):** `https://mindmate-backend-9kok.onrender.com`
 
 ---
 
-## 1. MOOD LOGGING & GRAPH MANAGEMENT
+## 1. MOOD LOGGING & ANALYSIS
 
 ### Walker: `log_mood`
 
-**Purpose:** Records a new mood entry and updates the graph with emotion node
+**Purpose:** Records a new mood entry and stores in root node
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/log_mood`
 
 **Request:**
 
 ```json
 {
-  "walker": "log_mood",
-  "ctx": {
-    "user_id": "user_001",
-    "mood_name": "anxious",
-    "intensity": 7.5,
-    "journal_text": "Had a tough day at work, feeling overwhelmed",
-    "triggers_identified": ["work", "deadlines"]
-  }
+  "user_id": "user_001",
+  "mood_name": "anxious",
+  "intensity": 7.5,
+  "journal_text": "Had a tough day at work, feeling overwhelmed"
 }
 ```
 
@@ -33,20 +32,20 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "status": "success",
-  "mood": "anxious",
-  "intensity": 7.5,
-  "entry_created": true,
-  "timestamp": "2024-01-15T10:30:00.000Z"
-}
-```
-
-**Error Response:**
-
-```json
-{
-  "error": "invalid_mood",
-  "message": "Mood 'xyz' not found in emotion catalog"
+  "reports": [
+    {
+      "status": "success",
+      "message": "Logged anxious mood at intensity 7.5",
+      "data": {
+        "user_id": "user_001",
+        "mood_name": "anxious",
+        "intensity": 7.5,
+        "journal_text": "Had a tough day at work, feeling overwhelmed",
+        "timestamp": "2025-12-19T10:30:00.123456"
+      },
+      "total_entries": 15
+    }
+  ]
 }
 ```
 
@@ -54,19 +53,16 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ### Walker: `analyze_journal`
 
-**Purpose:** Sends journal text to analytical LLM for emotional extraction
+**Purpose:** Analyzes journal text for emotional insights
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/analyze_journal`
 
 **Request:**
 
 ```json
 {
-  "walker": "analyze_journal",
-  "ctx": {
-    "journal_text": "I'm feeling so overwhelmed with work and personal life...",
-    "user_id": "user_001"
-  }
+  "journal_text": "I'm feeling so overwhelmed with work and personal life...",
+  "user_id": "user_001"
 }
 ```
 
@@ -74,46 +70,13 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "status": "analyzing",
-  "journal_length": 156,
-  "next_step": "emotion_from_text"
-}
-```
-
----
-
-### Walker: `update_graph`
-
-**Purpose:** Creates relationships between emotions, triggers, and activities
-
-**Endpoint:** `POST /api/walker`
-
-**Request:**
-
-```json
-{
-  "walker": "update_graph",
-  "ctx": {
-    "emotion_id": "emotion_anxious_001",
-    "trigger_ids": ["trigger_work_001", "trigger_sleep_001"],
-    "activity_ids": ["activity_exercise_001", "activity_meditation_001"],
-    "suggestion_ids": [
-      "suggestion_breathing_001",
-      "suggestion_affirmation_001"
-    ],
-    "emotion_intensity": 7.5
-  }
-}
-```
-
-**Response:**
-
-```json
-{
-  "triggers_connected": 2,
-  "activities_connected": 2,
-  "suggestions_connected": 2,
-  "graph_updated": true
+  "reports": [
+    {
+      "status": "analyzing",
+      "journal_length": 156,
+      "analysis_complete": true
+    }
+  ]
 }
 ```
 
@@ -123,18 +86,15 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ### Walker: `get_daily_summary`
 
-**Purpose:** Returns current emotional state with AI-generated suggestions
+**Purpose:** Returns current emotional state with recommendations
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/get_daily_summary`
 
 **Request:**
 
 ```json
 {
-  "walker": "get_daily_summary",
-  "ctx": {
-    "user_id": "user_001"
-  }
+  "user_id": "user_001"
 }
 ```
 
@@ -142,29 +102,26 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "current_mood": "anxious",
-  "intensity": 7.5,
-  "triggers": ["work_stress", "poor_sleep"],
-  "recommended_activities": [
+  "reports": [
     {
-      "name": "meditation",
-      "description": "10-minute guided meditation",
-      "effectiveness": 0.85
-    },
-    {
-      "name": "exercise",
-      "description": "30-minute walk",
-      "effectiveness": 0.78
+      "current_mood": "anxious",
+      "intensity": 7.5,
+      "triggers": ["work_stress", "poor_sleep"],
+      "recommended_activities": [
+        {
+          "name": "meditation",
+          "description": "10-minute guided meditation",
+          "effectiveness_score": 0.85
+        },
+        {
+          "name": "exercise",
+          "description": "30-minute walk",
+          "effectiveness_score": 0.78
+        }
+      ],
+      "timestamp": "2025-12-19T10:30:00.123456"
     }
-  ],
-  "suggestions": [
-    {
-      "title": "4-7-8 Breathing Exercise",
-      "type": "breathing_exercise",
-      "content": "Inhale for 4, hold for 7, exhale for 8"
-    }
-  ],
-  "timestamp": "2024-01-15T10:30:00.000Z"
+  ]
 }
 ```
 
@@ -174,17 +131,13 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 **Purpose:** Generates emotional trend report for the past week
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/get_weekly_summary`
 
 **Request:**
 
 ```json
 {
-  "walker": "get_weekly_summary",
-  "ctx": {
-    "user_id": "user_001",
-    "num_days": 7
-  }
+  "user_id": "user_001"
 }
 ```
 
@@ -192,19 +145,20 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "period": "last_7_days",
-  "total_entries": 6,
-  "dominant_emotions": {
-    "calm": 2,
-    "anxious": 2,
-    "stressed": 1,
-    "happy": 1
-  },
-  "trend_analysis": "Your emotional state has been relatively stable...",
-  "habit_recommendations": [
-    "Maintain your evening meditation routine",
-    "Try to get more consistent sleep",
-    "Consider increasing physical activity"
+  "reports": [
+    {
+      "period": "last_7_days",
+      "total_entries": 6,
+      "dominant_emotions": {
+        "calm": 2,
+        "anxious": 2,
+        "stressed": 1,
+        "happy": 1
+      },
+      "stability_score": 75.5,
+      "trend_direction": "stable",
+      "summary": "Your emotional state has been relatively stable this week..."
+    }
   ]
 }
 ```
@@ -215,19 +169,16 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ### Walker: `recommend_activities`
 
-**Purpose:** Recommends activities based on current mood using graph traversal
+**Purpose:** Recommends activities based on current mood
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/recommend_activities`
 
 **Request:**
 
 ```json
 {
-  "walker": "recommend_activities",
-  "ctx": {
-    "emotion_name": "anxious",
-    "intensity": 7.5
-  }
+  "emotion_name": "anxious",
+  "intensity": 7.5
 }
 ```
 
@@ -235,28 +186,29 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "emotion": "anxious",
-  "recommendations": [
+  "reports": [
     {
-      "name": "deep_breathing",
-      "description": "5-minute breathing exercise",
-      "effectiveness": 0.92,
-      "times_used": 15
-    },
-    {
-      "name": "meditation",
-      "description": "10-minute guided meditation",
-      "effectiveness": 0.85,
-      "times_used": 8
-    },
-    {
-      "name": "nature_walk",
-      "description": "30-minute walk in nature",
-      "effectiveness": 0.78,
-      "times_used": 5
+      "emotion": "anxious",
+      "recommendations": [
+        {
+          "name": "deep_breathing",
+          "description": "5-minute breathing exercise",
+          "effectiveness_score": 0.92
+        },
+        {
+          "name": "meditation",
+          "description": "10-minute guided meditation",
+          "effectiveness_score": 0.85
+        },
+        {
+          "name": "nature_walk",
+          "description": "30-minute walk in nature",
+          "effectiveness_score": 0.78
+        }
+      ],
+      "count": 3
     }
-  ],
-  "count": 3
+  ]
 }
 ```
 
@@ -266,19 +218,16 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 **Purpose:** Suggests specific habits to improve emotional wellbeing
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/suggest_habit_improvements`
 
 **Request:**
 
 ```json
 {
-  "walker": "suggest_habit_improvements",
-  "ctx": {
-    "detected_triggers": ["work_stress", "poor_sleep", "isolation"],
-    "dominant_emotions": ["anxious", "stressed"],
-    "current_habits": ["meditation", "journaling"],
-    "intensity_average": 6.2
-  }
+  "detected_triggers": ["work_stress", "poor_sleep", "isolation"],
+  "dominant_emotions": ["anxious", "stressed"],
+  "current_habits": ["meditation", "journaling"],
+  "intensity_average": 6.2
 }
 ```
 
@@ -286,22 +235,24 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "suggested_habits": [
+  "reports": [
     {
-      "name": "Morning Routine",
-      "description": "15-minute morning routine with breathing and stretching",
-      "helps_with": ["anxiety", "stress"],
-      "difficulty": "easy",
-      "implementation": "Start with just 5 minutes",
-      "expected_benefit": "high"
-    },
-    {
-      "name": "Exercise Routine",
-      "description": "30-minute physical activity 3x/week",
-      "helps_with": ["stress", "anxiety", "sleep"],
-      "difficulty": "medium",
-      "implementation": "Start with walks, progress to running",
-      "expected_benefit": "high"
+      "suggested_habits": [
+        {
+          "name": "Morning Routine",
+          "description": "15-minute morning routine with breathing and stretching",
+          "helps_with": ["anxiety", "stress"],
+          "difficulty": "easy",
+          "implementation": "Start with just 5 minutes"
+        },
+        {
+          "name": "Exercise Routine",
+          "description": "30-minute physical activity 3x/week",
+          "helps_with": ["stress", "anxiety", "sleep"],
+          "difficulty": "medium",
+          "implementation": "Start with walks, progress to running"
+        }
+      ]
     }
   ]
 }
@@ -309,23 +260,20 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ---
 
-## 4. LLM INTEGRATION WALKERS
+## 4. LLM INTEGRATION WALKERS (byLLM)
 
 ### Walker: `emotion_from_text`
 
-**Purpose:** Analytical LLM - Analyzes text to extract emotional information
+**Purpose:** Analytical byLLM - Analyzes text to extract emotional information
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/emotion_from_text`
 
 **Request:**
 
 ```json
 {
-  "walker": "emotion_from_text",
-  "ctx": {
-    "journal_text": "I'm feeling really anxious about the presentation tomorrow...",
-    "user_id": "user_001"
-  }
+  "journal_text": "I'm feeling really anxious about the presentation tomorrow...",
+  "user_id": "user_001"
 }
 ```
 
@@ -333,21 +281,20 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "user_id": "user_001",
-  "raw_text": "I'm feeling really anxious about the presentation tomorrow...",
-  "analysis": {
-    "emotions": ["anxious", "nervous"],
-    "intensity": 8,
-    "triggers": ["presentation", "public_speaking"],
-    "sentiment": "negative",
-    "themes": ["fear_of_judgment", "performance_pressure"],
-    "suggested_strategies": [
-      "Practice your presentation out loud",
-      "Do a grounding exercise before presenting",
-      "Remember past successes"
-    ]
-  },
-  "status": "complete"
+  "reports": [
+    {
+      "user_id": "user_001",
+      "raw_text": "I'm feeling really anxious about the presentation tomorrow...",
+      "analysis": {
+        "emotions": ["anxious", "nervous"],
+        "intensity": 8,
+        "triggers": ["presentation", "public_speaking"],
+        "sentiment": "negative",
+        "themes": ["fear_of_judgment", "performance_pressure"]
+      },
+      "status": "complete"
+    }
+  ]
 }
 ```
 
@@ -355,21 +302,17 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ### Walker: `generate_support_message`
 
-**Purpose:** Generative LLM - Creates empathetic responses
+**Purpose:** Generative byLLM - Creates empathetic responses
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/generate_support_message`
 
 **Request:**
 
 ```json
 {
-  "walker": "generate_support_message",
-  "ctx": {
-    "emotion_name": "anxious",
-    "intensity_score": 7.5,
-    "detected_triggers": ["work_deadline", "poor_sleep"],
-    "user_context": "I have a big presentation tomorrow"
-  }
+  "emotion_name": "anxious",
+  "intensity_score": 7.5,
+  "detected_triggers": ["work_deadline", "poor_sleep"]
 }
 ```
 
@@ -377,10 +320,14 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "emotion": "anxious",
-  "intensity": 7.5,
-  "message": "I hear you - feeling anxious about an upcoming presentation is completely natural. Your nervousness shows you care about doing well, which is actually a strength. Here's what might help...",
-  "generated_at": "2024-01-15T10:30:00.000Z"
+  "reports": [
+    {
+      "emotion": "anxious",
+      "intensity": 7.5,
+      "message": "I hear you - feeling anxious about an upcoming presentation is completely natural. Your nervousness shows you care about doing well, which is actually a strength. Here's what might help...",
+      "generated_at": "2025-12-19T10:30:00.123456"
+    }
+  ]
 }
 ```
 
@@ -388,20 +335,17 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ### Walker: `generate_breathing_exercise`
 
-**Purpose:** Generative LLM - Creates personalized breathing exercises
+**Purpose:** Generative byLLM - Creates personalized breathing exercises
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/generate_breathing_exercise`
 
 **Request:**
 
 ```json
 {
-  "walker": "generate_breathing_exercise",
-  "ctx": {
-    "emotion_name": "anxious",
-    "intensity_score": 8,
-    "duration_preference": 300
-  }
+  "emotion_name": "anxious",
+  "intensity_score": 8,
+  "duration_preference": 300
 }
 ```
 
@@ -409,20 +353,22 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "emotion": "anxious",
-  "intensity": 8,
-  "exercise": {
-    "name": "Extended Exhale Breathing",
-    "duration_seconds": 300,
-    "steps": [
-      "Sit or lie down in a comfortable position",
-      "Breathe in through your nose for a count of 4",
-      "Hold your breath for a count of 4",
-      "Exhale through your mouth for a count of 8",
-      "Repeat for 10 cycles (about 4 minutes total)"
-    ],
-    "benefit": "The extended exhale activates your parasympathetic nervous system, reducing anxiety"
-  }
+  "reports": [
+    {
+      "emotion": "anxious",
+      "intensity": 8,
+      "exercise_name": "Extended Exhale Breathing",
+      "description": "The extended exhale activates your parasympathetic nervous system, reducing anxiety",
+      "duration_minutes": 5,
+      "steps": [
+        "Sit or lie down in a comfortable position",
+        "Breathe in through your nose for a count of 4",
+        "Hold your breath for a count of 4",
+        "Exhale through your mouth for a count of 8",
+        "Repeat for 10 cycles (about 4 minutes total)"
+      ]
+    }
+  ]
 }
 ```
 
@@ -430,21 +376,17 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ### Walker: `generate_affirmation`
 
-**Purpose:** Generative LLM - Creates personalized affirmations
+**Purpose:** Generative byLLM - Creates personalized affirmations
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/generate_affirmation`
 
 **Request:**
 
 ```json
 {
-  "walker": "generate_affirmation",
-  "ctx": {
-    "emotion_name": "anxious",
-    "intensity_score": 7,
-    "user_name": "Sarah",
-    "detected_triggers": ["perfectionism", "public_speaking"]
-  }
+  "emotion_name": "anxious",
+  "intensity_score": 7,
+  "detected_triggers": ["perfectionism", "public_speaking"]
 }
 ```
 
@@ -452,9 +394,13 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "emotion": "anxious",
-  "affirmation": "Sarah, I am capable and prepared. My nervousness is just energy waiting to be channeled. I trust in my abilities and know that it's okay to be imperfect.",
-  "generated_at": "2024-01-15T10:30:00.000Z"
+  "reports": [
+    {
+      "emotion": "anxious",
+      "affirmation": "I am capable and prepared. My nervousness is just energy waiting to be channeled. I trust in my abilities and know that it's okay to be imperfect.",
+      "generated_at": "2025-12-19T10:30:00.123456"
+    }
+  ]
 }
 ```
 
@@ -462,29 +408,25 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ### Walker: `generate_weekly_reflection`
 
-**Purpose:** Generative LLM - Creates comprehensive weekly summary
+**Purpose:** Generative byLLM - Creates comprehensive weekly summary
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/generate_weekly_reflection`
 
 **Request:**
 
 ```json
 {
-  "walker": "generate_weekly_reflection",
-  "ctx": {
-    "user_id": "user_001",
-    "weekly_emotions": {
-      "calm": 2,
-      "anxious": 2,
-      "stressed": 1,
-      "happy": 1
-    },
-    "detected_patterns": [
-      "anxiety spikes on Monday",
-      "better mood after exercise"
-    ],
-    "week_number": 3
-  }
+  "user_id": "user_001",
+  "weekly_emotions": {
+    "calm": 2,
+    "anxious": 2,
+    "stressed": 1,
+    "happy": 1
+  },
+  "detected_patterns": [
+    "anxiety spikes on Monday",
+    "better mood after exercise"
+  ]
 }
 ```
 
@@ -492,10 +434,13 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "user_id": "user_001",
-  "week_number": 3,
-  "reflection": "What a meaningful week it's been! You've shown real emotional awareness...",
-  "generated_at": "2024-01-15T10:30:00.000Z"
+  "reports": [
+    {
+      "user_id": "user_001",
+      "reflection": "What a meaningful week it's been! You've shown real emotional awareness...",
+      "generated_at": "2025-12-19T10:30:00.123456"
+    }
+  ]
 }
 ```
 
@@ -507,17 +452,13 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 **Purpose:** Identifies most common emotional triggers
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/find_repeating_triggers`
 
 **Request:**
 
 ```json
 {
-  "walker": "find_repeating_triggers",
-  "ctx": {
-    "user_id": "user_001",
-    "lookback_days": 30
-  }
+  "user_id": "user_001"
 }
 ```
 
@@ -525,13 +466,16 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "user_id": "user_001",
-  "period_days": 30,
-  "triggers": [
-    ["work_stress", 12],
-    ["poor_sleep", 8],
-    ["social_conflict", 5],
-    ["financial_pressure", 3]
+  "reports": [
+    {
+      "user_id": "user_001",
+      "triggers": [
+        ["work_stress", 12],
+        ["poor_sleep", 8],
+        ["social_conflict", 5],
+        ["financial_pressure", 3]
+      ]
+    }
   ]
 }
 ```
@@ -542,17 +486,13 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 **Purpose:** Detects prevalent mood patterns
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/find_common_emotions`
 
 **Request:**
 
 ```json
 {
-  "walker": "find_common_emotions",
-  "ctx": {
-    "user_id": "user_001",
-    "period_days": 30
-  }
+  "user_id": "user_001"
 }
 ```
 
@@ -560,22 +500,25 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ```json
 {
-  "user_id": "user_001",
-  "period_days": 30,
-  "emotion_distribution": {
-    "calm": 8,
-    "anxious": 6,
-    "stressed": 5,
-    "happy": 4,
-    "peaceful": 3
-  },
-  "percentages": {
-    "calm": 33.3,
-    "anxious": 25.0,
-    "stressed": 20.8,
-    "happy": 16.7,
-    "peaceful": 12.5
-  }
+  "reports": [
+    {
+      "user_id": "user_001",
+      "emotion_distribution": {
+        "calm": 8,
+        "anxious": 6,
+        "stressed": 5,
+        "happy": 4,
+        "peaceful": 3
+      },
+      "percentages": {
+        "calm": 30.8,
+        "anxious": 23.1,
+        "stressed": 19.2,
+        "happy": 15.4,
+        "peaceful": 11.5
+      }
+    }
+  ]
 }
 ```
 
@@ -583,19 +526,32 @@ All walkers are called via Jaseci's `Spawn()` mechanism through the REST API.
 
 ### Walker: `calculate_emotional_trends`
 
-**Purpose:** Computes emotional trajectory and volatility
+**Purpose:** Computes emotional trajectory and stability score
 
-**Endpoint:** `POST /api/walker`
+**Endpoint:** `POST /walker/calculate_emotional_trends`
 
 **Request:**
 
 ```json
 {
-  "walker": "calculate_emotional_trends",
-  "ctx": {
-    "user_id": "user_001",
-    "lookback_days": 14
-  }
+  "user_id": "user_001"
+}
+```
+
+**Response:**
+
+```json
+{
+  "reports": [
+    {
+      "user_id": "user_001",
+      "stability_score": 75.5,
+      "trend_direction": "improving",
+      "volatility": 2.3,
+      "average_intensity": 5.8,
+      "trend_analysis": "Your emotional stability has improved over the past week..."
+    }
+  ]
 }
 ```
 
@@ -665,58 +621,56 @@ All errors follow this format:
 ### Log a mood with journaling
 
 ```javascript
-const response = await fetch("http://localhost:5000/api/walker", {
+const response = await fetch("http://localhost:8000/walker/log_mood", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    walker: "log_mood",
-    ctx: {
-      user_id: "user_001",
-      mood_name: "anxious",
-      intensity: 7.5,
-      journal_text: "Worried about tomorrow's presentation...",
-    },
+    user_id: "user_001",
+    mood_name: "anxious",
+    intensity: 7.5,
+    journal_text: "Worried about tomorrow's presentation...",
   }),
 });
 
 const result = await response.json();
-console.log(result);
+console.log(result.reports[0]);
 ```
 
 ### Get personalized support message
 
 ```javascript
-const response = await fetch("http://localhost:5000/api/walker", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    walker: "generate_support_message",
-    ctx: {
+const response = await fetch(
+  "http://localhost:8000/walker/generate_support_message",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       emotion_name: "anxious",
       intensity_score: 7.5,
       detected_triggers: ["work", "presentation"],
-      user_context: "Have a big presentation tomorrow",
-    },
-  }),
-});
+    }),
+  }
+);
 
 const support = await response.json();
-console.log(support.message);
+console.log(support.reports[0].message);
 ```
 
 ### Get weekly emotional summary
 
 ```javascript
-const response = await fetch("http://localhost:5000/api/walker", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    walker: "get_weekly_summary",
-    ctx: { user_id: "user_001" },
-  }),
-});
+const response = await fetch(
+  "http://localhost:8000/walker/get_weekly_summary",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: "user_001",
+    }),
+  }
+);
 
 const summary = await response.json();
-console.log(summary.dominant_emotions);
-console.log(summary.habit_recommendations);
+console.log(summary.reports[0].dominant_emotions);
+console.log(summary.reports[0].stability_score);
 ```
